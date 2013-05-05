@@ -30,7 +30,7 @@ class ZScan
   end
 
   def rest
-    _internal_string.byteslice bytepos
+    _internal_string.byteslice bytepos, _internal_string.bytesize
   end
 
   private :_internal_init, :_internal_string
@@ -38,10 +38,25 @@ end
 
 # coding: utf-8
 if __FILE__ == $PROGRAM_NAME
+  GC.stress = true
+  def assert a, b
+    raise "expected #{a.inspect} == #{b.inspect}" if a != b
+  end
   z = ZScan.new 'ab你好'
+  assert 2, z.bmatch?('ab')
+  z.pos = 4
+  assert 8, z.bytepos
   z.push_pos
-  z.scan /ab你/
-  p z.pos
-  p z.bytepos
+  assert nil, z.scan(/ab你/)
+  z.pos = 0
+  assert 'ab你', z.scan(/ab你/)
+  assert 3, z.pos
+  assert 5, z.bytepos
   z.pop_pos
+  assert 4, z.pos
+  assert 8, z.bytepos
+  z.bytepos = 2
+  assert '你', z.scan('你')
+  assert '好', z.rest
+  z = nil
 end

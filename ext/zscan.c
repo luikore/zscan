@@ -157,7 +157,10 @@ regex_t *rb_reg_prepare_re(VALUE re, VALUE str);
 static VALUE zscan_bmatch_p(VALUE self, VALUE pattern) {
   P;
   if (TYPE(pattern) == T_STRING) {
-    // todo
+    volatile VALUE ss = rb_funcall(self, rb_intern("rest"), 0);
+    if (RTEST(rb_funcall(ss, rb_intern("start_with?"), 1, pattern))) {
+      return ULONG2NUM(RSTRING_LEN(pattern));
+    }
   } else if (TYPE(pattern) == T_REGEXP) {
     regex_t *re = rb_reg_prepare_re(pattern, p->s);
     int tmpreg = re != RREGEXP(pattern)->ptr;
