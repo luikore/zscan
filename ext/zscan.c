@@ -11,7 +11,6 @@ typedef struct {
   size_t pos;
   size_t bytepos;
   VALUE s;
-  struct re_registers regs;
   size_t stack_i;
   size_t stack_cap;
   Pos* stack;
@@ -26,15 +25,13 @@ static void zscan_mark(void* pp) {
 
 static void zscan_free(void* pp) {
   ZScan* p = pp;
-  onig_region_free(&(p->regs), 0);
   free(p->stack);
   ruby_xfree(p);
 }
 
-extern size_t onig_region_memsize P_((const struct re_registers *regs));
 static size_t zscan_memsize(const void* pp) {
   const ZScan* p = pp;
-  return p ? sizeof(*p) - sizeof(p->regs) + onig_region_memsize(&p->regs) : 0;
+  return p ? sizeof(*p) : 0;
 }
 
 static const rb_data_type_t zscan_type = {
@@ -45,7 +42,6 @@ static const rb_data_type_t zscan_type = {
 static VALUE zscan_alloc(VALUE klass) {
   ZScan* p = ALLOC(ZScan);
   MEMZERO(p, ZScan, 1);
-  onig_region_init(&(p->regs));
   p->s = Qnil;
   p->stack_cap = 5;
   p->stack = (Pos*)malloc(sizeof(Pos) * 5);
@@ -168,12 +164,14 @@ static VALUE zscan_bmatch_p(VALUE self, VALUE pattern) {
   } else if (TYPE(pattern) == T_REGEXP) {
     regex_t *re = rb_reg_prepare_re(pattern, p->s);
     int tmpreg = re != RREGEXP(pattern)->ptr;
-    if (!tmpreg) RREGEXP(pattern)->usecnt++;
+    if (!tmpreg) {
+      RREGEXP(pattern)->usecnt++;
+    }
 
     char* ptr = RSTRING_PTR(p->s);
     UChar* ptr_end = (UChar*)(ptr + RSTRING_LEN(p->s));
     UChar* ptr_match_from = (UChar*)(ptr + p->bytepos);
-    long ret = onig_match(re, (UChar*)ptr, ptr_end, ptr_match_from, &(p->regs), ONIG_OPTION_NONE);
+    long ret = onig_match(re, (UChar*)ptr, ptr_end, ptr_match_from, NULL, ONIG_OPTION_NONE);
 
     if (!tmpreg) {
       RREGEXP(pattern)->usecnt--;
@@ -190,7 +188,7 @@ static VALUE zscan_bmatch_p(VALUE self, VALUE pattern) {
     if (ret == -2) {
       rb_raise(rb_eRuntimeError, "regexp buffer overflow");
     } else if (ret >= 0) {
-      return ULONG2NUM(p->regs.end[0]);
+      return LONG2NUM(ret);
     }
   } else {
     rb_raise(rb_eTypeError, "expect String or Regexp");

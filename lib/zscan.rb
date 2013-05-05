@@ -1,7 +1,7 @@
 require_relative "../ext/zscan"
 
 class ZScan
-  VERSION = '0.3'
+  VERSION = '0.4'
 
   def initialize s, dup=false
     _internal_init dup ? s.dup : s
@@ -58,11 +58,15 @@ if __FILE__ == $PROGRAM_NAME
   z.bytepos = 2
   assert '你', z.scan('你')
   assert '好', z.rest
+
   z.bytepos = 20
   assert 8, z.bytepos
-  assert 4, z.pos
+
   z.skip('ab')
   assert 8, z.bytepos
   assert 4, z.pos
-  z = nil
+
+  z = ZScan.new "a x:b+ $ \\k<x>"
+  z.pos = 1
+  assert ' ', z.scan(/\s*(\#.*$\s*)*/)
 end
