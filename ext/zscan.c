@@ -111,6 +111,10 @@ static VALUE zscan_bytepos_eq(VALUE self, VALUE v_bytepos) {
   size_t bytepos = NUM2ULONG(v_bytepos);
   size_t from, to;
 
+  if (bytepos > (size_t)RSTRING_LEN(p->s)) {
+    bytepos = RSTRING_LEN(p->s);
+  }
+
   if (bytepos > p->bytepos) {
     from = p->bytepos;
     to = bytepos;
