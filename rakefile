@@ -1,0 +1,8 @@
+desc "build and test"
+task :default do
+  Dir.chdir __dir__
+  Dir.chdir "ext"
+  system "make"
+  Dir.chdir ".."
+  system "rspec && gem build zscan.gemspec"
+end

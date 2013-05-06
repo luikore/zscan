@@ -47,6 +47,10 @@ See also https://bugs.ruby-lang.org/issues/7092
 - `bytepos`
 - `bytepos= new_bytepos` note: complexity ~ `abs(new_bytepos - bytepos)`.
 - `advance n` move forward `n` codepoints, if `n < 0`, move backward. Stops at beginning or end.
-- `push_pos` efficiently pushes current pos into the stack.
-- `pop_pos` efficiently sets current pos to top of the stack, and pops it.
+
+## Efficient pos stack manipulation
+
+- `push_pos` pushes current pos into the stack.
+- `pop_pos` sets current pos to top of the stack, and pops it.
 - `drop_top` drops top of pos stack without changing current pos.
+- `resume_top` sets current pos to top of the stack.

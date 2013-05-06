@@ -104,11 +104,15 @@ static VALUE zscan_bytepos(VALUE self) {
 
 static VALUE zscan_bytepos_eq(VALUE self, VALUE v_bytepos) {
   P;
-  size_t bytepos = NUM2ULONG(v_bytepos);
-  size_t from, to;
+  long signed_bytepos = NUM2LONG(v_bytepos);
+  size_t from, to, bytepos;
 
-  if (bytepos > (size_t)RSTRING_LEN(p->s)) {
+  if (signed_bytepos > RSTRING_LEN(p->s)) {
     bytepos = RSTRING_LEN(p->s);
+  } else if (signed_bytepos < 0) {
+    bytepos = 0;
+  } else {
+    bytepos = signed_bytepos;
   }
 
   if (bytepos > p->bytepos) {
@@ -229,6 +233,15 @@ static VALUE zscan_drop_top(VALUE self) {
   return self;
 }
 
+static VALUE zscan_resume_top(VALUE self) {
+  P;
+  if (p->stack_i) {
+    p->pos = p->stack[p->stack_i].pos;
+    p->bytepos = p->stack[p->stack_i].bytepos;
+  }
+  return self;
+}
+
 void Init_zscan() {
   VALUE zscan = rb_define_class("ZScan", rb_cObject);
   rb_define_alloc_func(zscan, zscan_alloc);
@@ -244,4 +257,5 @@ void Init_zscan() {
   rb_define_method(zscan, "push_pos", zscan_push_pos, 0);
   rb_define_method(zscan, "pop_pos", zscan_pop_pos, 0);
   rb_define_method(zscan, "drop_top", zscan_drop_top, 0);
+  rb_define_method(zscan, "resume_top", zscan_resume_top, 0);
 }
