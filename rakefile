@@ -1,8 +1,34 @@
+Dir.chdir __dir__
+version_re  = /\d+(\.\d+)*/
+version     = `command grep 'VERSION =' lib/zscan.rb`[version_re]
+gem_files   = Dir.glob('{rakefile,zscan.gemspec,readme.md,**/*.{rb,c}}')
+gem_package = "zscan-#{version}.gem"
+
 desc "build and test"
-task :default do
-  Dir.chdir __dir__
+task :default => [:test, gem_package]
+
+desc "build and run test"
+task :test do
   Dir.chdir "ext"
-  system "make"
+  sh "make"
   Dir.chdir ".."
-  system "rspec && gem build zscan.gemspec"
+  sh "rspec"
+end
+
+desc "pack gem"
+file gem_package => gem_files do
+  sh "rm zscan-*.gem"
+
+  new_version = false
+  lines = File.readlines('zscan.gemspec')
+  lines.each do |line|
+    if line =~ /s\.version =/ and (line.sub! version_re, version)
+      new_version = true
+      break
+    end
+  end
+  if new_version
+    File.open('zscan.gemspec', 'w'){|f| f << lines.join }
+  end
+  sh "gem build zscan.gemspec"
 end
