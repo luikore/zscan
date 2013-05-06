@@ -161,7 +161,7 @@ regex_t *rb_reg_prepare_re(VALUE re, VALUE str);
 static VALUE zscan_match_bytesize(VALUE self, VALUE pattern) {
   P;
   if (TYPE(pattern) == T_STRING) {
-    volatile VALUE ss = rb_funcall(self, rb_intern("rest"), 0);
+    volatile VALUE ss = rb_funcall(p->s, rb_intern("byteslice"), 2, ULONG2NUM(p->bytepos), ULONG2NUM(RSTRING_LEN(p->s)));
     if (RTEST(rb_funcall(ss, rb_intern("start_with?"), 1, pattern))) {
       return ULONG2NUM(RSTRING_LEN(pattern));
     }
