@@ -158,7 +158,7 @@ static VALUE zscan_eos_p(VALUE self) {
 }
 
 regex_t *rb_reg_prepare_re(VALUE re, VALUE str);
-static VALUE zscan_bmatch_p(VALUE self, VALUE pattern) {
+static VALUE zscan_match_bytesize(VALUE self, VALUE pattern) {
   P;
   if (TYPE(pattern) == T_STRING) {
     volatile VALUE ss = rb_funcall(self, rb_intern("rest"), 0);
@@ -253,7 +253,7 @@ void Init_zscan() {
   rb_define_method(zscan, "bytepos=", zscan_bytepos_eq, 1);
   rb_define_method(zscan, "advance", zscan_advance, 1);
   rb_define_method(zscan, "eos?", zscan_eos_p, 0);
-  rb_define_method(zscan, "bmatch?", zscan_bmatch_p, 1);
+  rb_define_method(zscan, "match_bytesize", zscan_match_bytesize, 1);
   rb_define_method(zscan, "push", zscan_push, 0);
   rb_define_method(zscan, "pop", zscan_pop, 0);
   rb_define_method(zscan, "drop", zscan_drop, 0);

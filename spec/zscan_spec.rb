@@ -12,7 +12,7 @@ describe ZScan do
   end
 
   it "random workflow" do
-    assert_equal 2, @z.bmatch?('ab')
+    assert_equal 2, @z.match_bytesize('ab')
     @z.pos = 4
     assert_equal 8, @z.bytepos
     @z.push

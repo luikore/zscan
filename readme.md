@@ -49,27 +49,29 @@ See also https://bugs.ruby-lang.org/issues/7092
 ## Methods
 
 - `ZScan.new string, dup=false`
-- `scan regexp_or_string`
-- `skip regexp_or_string`
-- `bmatch? regexp_or_string` returns length of matched bytes or nil
-- `eos?`
-- `string` note: returns a COW dup
-- `rest`
+- `#scan regexp_or_string`
+- `#skip regexp_or_string`
+- `#match_bytesize regexp_or_string` returns length of matched bytes or nil
+- `#eos?`
+- `#string` note: returns a COW dup
+- `#rest`
 
-## Position management
+## Pos management
 
-- `pos`
-- `pos= new_pos` note: complexity ~ `new_pos > pos ? new_pos - pos : new_pos`.
-- `bytepos`
-- `bytepos= new_bytepos` note: complexity ~ `abs(new_bytepos - bytepos)`.
-- `advance n` move forward `n` codepoints, if `n < 0`, move backward. Stops at beginning or end.
+- `#pos`
+- `#pos= new_pos` note: complexity ~ `new_pos > pos ? new_pos - pos : new_pos`.
+- `#bytepos`
+- `#bytepos= new_bytepos` note: complexity ~ `abs(new_bytepos - bytepos)`.
+- `#advance n` move forward `n` codepoints, if `n < 0`, move backward. Stops at beginning or end.
+- `#reset` go to beginning.
+- `#terminate` go to end of string.
 
 ## Efficient pos stack manipulation
 
-- `push` pushes current pos into the stack.
-- `pop` sets current pos to top of the stack, and pops it.
-- `drop` drops top of pos stack without changing current pos.
-- `restore` sets current pos to top of the stack.
+- `#push` pushes current pos into the stack.
+- `#pop` sets current pos to top of the stack, and pops it.
+- `#drop` drops top of pos stack without changing current pos.
+- `#restore` sets current pos to top of the stack.
 
 ## License
 

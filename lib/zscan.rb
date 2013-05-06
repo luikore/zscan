@@ -12,7 +12,7 @@ class ZScan
   end
 
   def scan re_or_str
-    if sz = bmatch?(re_or_str)
+    if sz = match_bytesize(re_or_str)
       r = _internal_string.byteslice bytepos, sz
       self.bytepos += sz
       r
@@ -20,7 +20,7 @@ class ZScan
   end
 
   def skip re_or_str
-    if sz = bmatch?(re_or_str)
+    if sz = match_bytesize(re_or_str)
       self.bytepos += sz
     end
   end
@@ -31,6 +31,15 @@ class ZScan
 
   def rest
     _internal_string.byteslice bytepos, _internal_string.bytesize
+  end
+
+  def reset
+    self.pos = 0
+    self
+  end
+
+  def terminate
+    self.pos = _internal_string.size
   end
 
   private :_internal_init, :_internal_string
