@@ -4,11 +4,13 @@ RSpec.configure do |config|
   config.expect_with :stdlib
 end
 
-# GC.stress = true
-
 describe ZScan do
   before :each do
     @z = ZScan.new 'ab你好'
+  end
+
+  before :all do
+    GC.stress = true
   end
 
   it "random workflow" do
