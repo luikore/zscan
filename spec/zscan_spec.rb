@@ -15,15 +15,15 @@ describe ZScan do
     assert_equal 2, @z.bmatch?('ab')
     @z.pos = 4
     assert_equal 8, @z.bytepos
-    @z.push_pos
+    @z.push
     assert_equal nil, @z.scan(/ab你/)
     @z.pos = 0
     assert_equal 'ab你', @z.scan(/ab你/)
 
-    @z.resume_top
+    @z.restore
     assert_equal 8, @z.bytepos
     @z.pos = 3
-    @z.resume_top
+    @z.restore
     assert_equal 8, @z.bytepos
   end
 

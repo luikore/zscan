@@ -1,24 +1,30 @@
-## Motivation
+## Features
 
-A simple string scanner. Provides... much less methods than `StringScanner`.
+- `ZScan#scan`/`ZScan#skip`/`ZScan#match_bytesize` accept either string or regexp as param.
+- `ZScan#pos` is the codepoint position, and `ZScan#bytepos` is byte position.
+- Correctly scans anchors and look behind predicates.
+- Pos stack manipulation.
 
-It supports either string or regexp as scan param.
+## Install
 
-`pos` is by codepoints instead of bytes, use `bytepos` to locate byte position.
-
-It provides a position stack for you to efficiently manage scanning locations.
-
-It correctly scans anchors. The following codes demonstrate the behavior:
-
-```ruby
-require 'zscan'
-z = ZScan.new 'ab'
-z.pos = 1
-z.scan /(?<a)/ #=> ''
-z.scan /^/     #=> nil
+```bash
+gem ins zscan
 ```
 
-While with `StringScanner`:
+## Typical use
+
+``` ruby
+require 'zscan'
+z = ZScan.new 'hello world'
+z.scan 'hello' #=> 'hello'
+z.skip ' '
+z.scan /\w+/   #=> 'world'
+z.eos?         #=> true
+```
+
+## Motivation
+
+Ruby's stdlib `StringScanner` treats the scanning position as beginning of string:
 
 ```ruby
 require 'strscan'
@@ -26,6 +32,16 @@ s = StringScanner.new 'ab'
 s.pos = 1
 s.scan /(?<a)/ #=> nil
 s.scan /^/     #=> ''
+```
+
+But for building parser generators, I need the scanner check the whole string for anchors and lookbehinds:
+
+```ruby
+require 'zscan'
+z = ZScan.new 'ab'
+z.pos = 1
+z.scan /(?<a)/ #=> ''
+z.scan /^/     #=> nil
 ```
 
 See also https://bugs.ruby-lang.org/issues/7092
@@ -50,7 +66,28 @@ See also https://bugs.ruby-lang.org/issues/7092
 
 ## Efficient pos stack manipulation
 
-- `push_pos` pushes current pos into the stack.
-- `pop_pos` sets current pos to top of the stack, and pops it.
-- `drop_top` drops top of pos stack without changing current pos.
-- `resume_top` sets current pos to top of the stack.
+- `push` pushes current pos into the stack.
+- `pop` sets current pos to top of the stack, and pops it.
+- `drop` drops top of pos stack without changing current pos.
+- `restore` sets current pos to top of the stack.
+
+## License
+
+Copyright (C) 2013 by Zete Lui (BSD)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN

@@ -43,8 +43,8 @@ static VALUE zscan_alloc(VALUE klass) {
   ZScan* p = ALLOC(ZScan);
   MEMZERO(p, ZScan, 1);
   p->s = Qnil;
-  p->stack_cap = 5;
-  p->stack = (Pos*)malloc(sizeof(Pos) * 5);
+  p->stack_cap = 8;
+  p->stack = (Pos*)malloc(sizeof(Pos) * p->stack_cap);
   return TypedData_Wrap_Struct(klass, &zscan_type, p);
 }
 
@@ -201,10 +201,10 @@ static VALUE zscan_bmatch_p(VALUE self, VALUE pattern) {
   return Qnil;
 }
 
-static VALUE zscan_push_pos(VALUE self) {
+static VALUE zscan_push(VALUE self) {
   P;
   if (p->stack_i + 1 == p->stack_cap) {
-    p->stack_cap *= 2;
+    p->stack_cap = p->stack_cap * 1.4 + 3;
     p->stack = (Pos*)realloc(p->stack, sizeof(Pos) * p->stack_cap);
   }
   Pos e = {p->pos, p->bytepos};
@@ -212,7 +212,7 @@ static VALUE zscan_push_pos(VALUE self) {
   return self;
 }
 
-static VALUE zscan_pop_pos(VALUE self) {
+static VALUE zscan_pop(VALUE self) {
   P;
   if (p->stack_i) {
     p->pos = p->stack[p->stack_i].pos;
@@ -225,7 +225,7 @@ static VALUE zscan_pop_pos(VALUE self) {
   return self;
 }
 
-static VALUE zscan_drop_top(VALUE self) {
+static VALUE zscan_drop(VALUE self) {
   P;
   if (p->stack_i) {
     p->stack_i--;
@@ -233,7 +233,7 @@ static VALUE zscan_drop_top(VALUE self) {
   return self;
 }
 
-static VALUE zscan_resume_top(VALUE self) {
+static VALUE zscan_restore(VALUE self) {
   P;
   if (p->stack_i) {
     p->pos = p->stack[p->stack_i].pos;
@@ -254,8 +254,8 @@ void Init_zscan() {
   rb_define_method(zscan, "advance", zscan_advance, 1);
   rb_define_method(zscan, "eos?", zscan_eos_p, 0);
   rb_define_method(zscan, "bmatch?", zscan_bmatch_p, 1);
-  rb_define_method(zscan, "push_pos", zscan_push_pos, 0);
-  rb_define_method(zscan, "pop_pos", zscan_pop_pos, 0);
-  rb_define_method(zscan, "drop_top", zscan_drop_top, 0);
-  rb_define_method(zscan, "resume_top", zscan_resume_top, 0);
+  rb_define_method(zscan, "push", zscan_push, 0);
+  rb_define_method(zscan, "pop", zscan_pop, 0);
+  rb_define_method(zscan, "drop", zscan_drop, 0);
+  rb_define_method(zscan, "restore", zscan_restore, 0);
 }
