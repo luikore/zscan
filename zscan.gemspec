@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = "zscan"
-  s.version = "0.5" # version mapped from zscan.rb, don't change here
+  s.version = "1.0" # version mapped from zscan.rb, don't change here
   s.author = "Zete Lui"
   s.homepage = "https://github.com/luikore/zscan"
   s.platform = Gem::Platform::RUBY

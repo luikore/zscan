@@ -1,7 +1,7 @@
 require_relative "../ext/zscan"
 
 class ZScan
-  VERSION = '0.5'
+  VERSION = '1.0'
 
   def initialize s, dup=false
     _internal_init dup ? s.dup : s
