@@ -42,5 +42,28 @@ class ZScan
     self.pos = _internal_string.size
   end
 
+  def << substring
+    _internal_string << substring
+  end
+
+  def []= range, substring
+    start = range.start
+    if start < 0
+      start = _internal_string.size + start
+    end
+    if start < pos
+      self.pos = start
+    end
+    _internal_string[range] = substring
+  end
+
+  def size
+    _internal_string.size
+  end
+
+  def bytesize
+    _internal_string.bytesize
+  end
+
   private :_internal_init, :_internal_string
 end

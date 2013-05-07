@@ -166,7 +166,7 @@ static VALUE zscan_match_bytesize(VALUE self, VALUE pattern) {
       return ULONG2NUM(RSTRING_LEN(pattern));
     }
   } else if (TYPE(pattern) == T_REGEXP) {
-    regex_t *re = rb_reg_prepare_re(pattern, p->s);
+    regex_t *re = rb_reg_prepare_re(pattern, p->s); // prepare with compatible encoding
     int tmpreg = re != RREGEXP(pattern)->ptr;
     if (!tmpreg) {
       RREGEXP(pattern)->usecnt++;
@@ -177,9 +177,6 @@ static VALUE zscan_match_bytesize(VALUE self, VALUE pattern) {
     UChar* ptr_match_from = (UChar*)(ptr + p->bytepos);
     long ret = onig_match(re, (UChar*)ptr, ptr_end, ptr_match_from, NULL, ONIG_OPTION_NONE);
 
-    if (!tmpreg) {
-      RREGEXP(pattern)->usecnt--;
-    }
     if (tmpreg) {
       if (RREGEXP(pattern)->usecnt) {
         onig_free(re);
@@ -187,6 +184,8 @@ static VALUE zscan_match_bytesize(VALUE self, VALUE pattern) {
         onig_free(RREGEXP(pattern)->ptr);
         RREGEXP(pattern)->ptr = re;
       }
+    } else {
+      RREGEXP(pattern)->usecnt--;
     }
 
     if (ret == -2) {
@@ -242,6 +241,24 @@ static VALUE zscan_restore(VALUE self) {
   return self;
 }
 
+static VALUE zscan_clear_pos_stack(VALUE self) {
+  P;
+  p->stack_i = 0;
+  return self;
+}
+
+static VALUE zscan_try(VALUE self) {
+  if (!rb_block_given_p()) {
+    rb_raise(rb_eRuntimeError, "need a block");
+  }
+  zscan_push(self);
+  if (RTEST(rb_yield(Qnil))) {
+    return zscan_drop(self);
+  } else {
+    return zscan_pop(self);
+  }
+}
+
 void Init_zscan() {
   VALUE zscan = rb_define_class("ZScan", rb_cObject);
   rb_define_alloc_func(zscan, zscan_alloc);
@@ -258,4 +275,6 @@ void Init_zscan() {
   rb_define_method(zscan, "pop", zscan_pop, 0);
   rb_define_method(zscan, "drop", zscan_drop, 0);
   rb_define_method(zscan, "restore", zscan_restore, 0);
+  rb_define_method(zscan, "clear_pos_stack", zscan_clear_pos_stack, 0);
+  rb_define_method(zscan, "try", zscan_try, 0);
 }

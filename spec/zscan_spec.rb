@@ -64,4 +64,31 @@ describe ZScan do
     assert_equal '', z.scan(/(?<=a)/)
     assert_equal nil, z.scan(/^/)
   end
+
+  it "stack doesn't underflow" do
+    @z.push
+    @z.pop
+    @z.pop
+    @z.pos = 3
+    @z.push
+    @z.pos = 4
+    @z.pop
+    assert_equal 3, @z.pos
+  end
+
+  it "#try restores pos" do
+    z = ZScan.new "hello"
+    z.try do
+      z.scan 'h'
+      z.scan 'e'
+    end
+    assert_equal 2, z.pos
+
+    z.try do
+      z.scan 'l'
+      z.scan 'l'
+      z.scan 'p' # fails
+    end
+    assert_equal 2, z.pos
+  end
 end

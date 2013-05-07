@@ -46,14 +46,14 @@ z.scan /^/     #=> nil
 
 See also https://bugs.ruby-lang.org/issues/7092
 
-## Methods
+## Essential methods
 
 - `ZScan.new string, dup=false`
 - `#scan regexp_or_string`
 - `#skip regexp_or_string`
-- `#match_bytesize regexp_or_string` returns length of matched bytes or nil
+- `#match_bytesize regexp_or_string` return length of matched bytes or `nil`.
 - `#eos?`
-- `#string` note: returns a COW dup
+- `#string` note: return a dup. Don't worry the performance because it is a copy-on-write string.
 - `#rest`
 
 ## Pos management
@@ -68,13 +68,23 @@ See also https://bugs.ruby-lang.org/issues/7092
 
 ## Efficient pos stack manipulation
 
-- `#push` pushes current pos into the stack.
-- `#pop` sets current pos to top of the stack, and pops it.
-- `#drop` drops top of pos stack without changing current pos.
-- `#restore` sets current pos to top of the stack.
+- `#push` push current pos into the stack.
+- `#pop` set current pos to top of the stack, and pop it.
+- `#drop` drop top of pos stack without changing current pos.
+- `#restore` set current pos to top of the stack.
+- `#clear_pos_stack` clear pos stack.
+- `#try` try to do several scans in the given block, fall back to init pos if block returns `nil` or `false`. Can be nested.
+
+## String delegates
+
+- `#<< append_string`
+- `#[]= range, replace_string` note: if `range` starts before pos, moves pos left, also clears the stack.
+- `#size`
+- `#bytesize`
 
 ## License
 
+```
 Copyright (C) 2013 by Zete Lui (BSD)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -93,3 +103,4 @@ FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+```
