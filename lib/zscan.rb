@@ -11,14 +11,6 @@ class ZScan
     _internal_string.dup
   end
 
-  def scan re_or_str
-    if sz = match_bytesize(re_or_str)
-      r = _internal_string.byteslice bytepos, sz
-      self.bytepos += sz
-      r
-    end
-  end
-
   def skip re_or_str
     if sz = match_bytesize(re_or_str)
       self.bytepos += sz
@@ -67,3 +59,6 @@ class ZScan
 
   private :_internal_init, :_internal_string
 end
+
+# rooooobust!
+Zscan = ZScan

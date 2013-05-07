@@ -9,9 +9,7 @@ task :default => [:test, gem_package]
 
 desc "build and run test"
 task :test do
-  Dir.chdir "ext"
-  sh "make"
-  Dir.chdir ".."
+  sh "make -C ext"
   sh "rspec"
 end
 

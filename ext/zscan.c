@@ -200,6 +200,21 @@ static VALUE zscan_match_bytesize(VALUE self, VALUE pattern) {
   return Qnil;
 }
 
+static VALUE zscan_scan(VALUE self, VALUE pattern) {
+  VALUE v_bytelen = zscan_match_bytesize(self, pattern);
+  if (v_bytelen == Qnil) {
+    return Qnil;
+  } else {
+    P;
+    long bytelen = NUM2LONG(v_bytelen);
+    volatile VALUE ret = rb_funcall(p->s, rb_intern("byteslice"), 2, LONG2NUM(p->bytepos), v_bytelen);
+    VALUE v_len = rb_str_length(ret);
+    p->bytepos += bytelen;
+    p->pos += NUM2LONG(v_len);
+    return ret;
+  }
+}
+
 static VALUE zscan_push(VALUE self) {
   P;
   if (p->stack_i + 1 == p->stack_cap) {
@@ -274,6 +289,7 @@ void Init_zscan() {
   rb_define_method(zscan, "advance", zscan_advance, 1);
   rb_define_method(zscan, "eos?", zscan_eos_p, 0);
   rb_define_method(zscan, "match_bytesize", zscan_match_bytesize, 1);
+  rb_define_method(zscan, "scan", zscan_scan, 1);
   rb_define_method(zscan, "push", zscan_push, 0);
   rb_define_method(zscan, "pop", zscan_pop, 0);
   rb_define_method(zscan, "drop", zscan_drop, 0);
