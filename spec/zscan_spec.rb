@@ -78,17 +78,19 @@ describe ZScan do
 
   it "#try restores pos" do
     z = ZScan.new "hello"
-    z.try do
+    return1 = z.try do
       z.scan 'h'
       z.scan 'e'
     end
+    assert_equal 'e', return1
     assert_equal 2, z.pos
 
-    z.try do
+    return2 = z.try do
       z.scan 'l'
       z.scan 'l'
       z.scan 'p' # fails
     end
+    assert_equal nil, return2
     assert_equal 2, z.pos
   end
 end

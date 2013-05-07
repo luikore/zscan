@@ -73,7 +73,7 @@ See also https://bugs.ruby-lang.org/issues/7092
 - `#drop` drop top of pos stack without changing current pos.
 - `#restore` set current pos to top of the stack.
 - `#clear_pos_stack` clear pos stack.
-- `#try` try to do several scans in the given block, fall back to init pos if block returns `nil` or `false`. Can be nested.
+- `#try` try to do several scans in the given block, fall back to init pos if block returns `nil` or `false`. Returns block's return, can be nested.
 
 ## String delegates
 

@@ -251,12 +251,15 @@ static VALUE zscan_try(VALUE self) {
   if (!rb_block_given_p()) {
     rb_raise(rb_eRuntimeError, "need a block");
   }
+  VALUE r;
   zscan_push(self);
-  if (RTEST(rb_yield(Qnil))) {
-    return zscan_drop(self);
+  r = rb_yield(Qnil);
+  if (RTEST(r)) {
+    zscan_drop(self);
   } else {
-    return zscan_pop(self);
+    zscan_pop(self);
   }
+  return r;
 }
 
 void Init_zscan() {
