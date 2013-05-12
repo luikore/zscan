@@ -1,8 +1,4 @@
-require_relative "../lib/zscan"
-require 'rspec/autorun'
-RSpec.configure do |config|
-  config.expect_with :stdlib
-end
+require_relative "spec_helper"
 
 describe ZScan do
   before :each do
@@ -74,23 +70,5 @@ describe ZScan do
     @z.pos = 4
     @z.pop
     assert_equal 3, @z.pos
-  end
-
-  it "#try restores pos" do
-    z = ZScan.new "hello"
-    return1 = z.try do
-      z.scan 'h'
-      z.scan 'e'
-    end
-    assert_equal 'e', return1
-    assert_equal 2, z.pos
-
-    return2 = z.try do
-      z.scan 'l'
-      z.scan 'l'
-      z.scan 'p' # fails
-    end
-    assert_equal nil, return2
-    assert_equal 2, z.pos
   end
 end

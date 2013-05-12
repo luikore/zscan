@@ -262,10 +262,13 @@ static VALUE zscan_clear_pos_stack(VALUE self) {
   return self;
 }
 
-static VALUE zscan_try(VALUE self) {
-  if (!rb_block_given_p()) {
-    rb_raise(rb_eRuntimeError, "need a block");
+#define REQUIRE_BLOCK \
+  if (!rb_block_given_p()) {\
+    rb_raise(rb_eRuntimeError, "need a block");\
   }
+
+static VALUE zscan_try(VALUE self) {
+  REQUIRE_BLOCK;
   VALUE r;
   zscan_push(self);
   r = rb_yield(Qnil);
@@ -275,6 +278,83 @@ static VALUE zscan_try(VALUE self) {
     zscan_pop(self);
   }
   return r;
+}
+
+static VALUE zscan_zero_or_one(int argc, VALUE* argv, VALUE self) {
+  REQUIRE_BLOCK;
+  volatile VALUE a = Qnil;
+  volatile VALUE r;
+  rb_scan_args(argc, argv, "01", &a);
+  if (a == Qnil) {
+    a = rb_ary_new();
+  }
+  zscan_push(self);
+  r = rb_yield(Qnil);
+  if (RTEST(r)) {
+    rb_funcall(a, rb_intern("<<"), 1, r);
+    zscan_drop(self);
+  } else {
+    zscan_pop(self);
+  }
+  return a;
+}
+
+static VALUE zscan_zero_or_more(int argc, VALUE* argv, VALUE self) {
+  REQUIRE_BLOCK;
+  volatile VALUE a = Qnil;
+  volatile VALUE r;
+  size_t backpos;
+  P;
+  rb_scan_args(argc, argv, "01", &a);
+  if (a == Qnil) {
+    a = rb_ary_new();
+  }
+  for (;;) {
+    zscan_push(self);
+    backpos = p->bytepos;
+    r = rb_yield(Qnil);
+    if (RTEST(r) && backpos != p->bytepos) {
+      rb_funcall(a, rb_intern("<<"), 1, r);
+      zscan_drop(self);
+    } else {
+      zscan_pop(self);
+      break;
+    }
+  }
+  return a;
+}
+
+static VALUE zscan_one_or_more(int argc, VALUE* argv, VALUE self) {
+  REQUIRE_BLOCK;
+  volatile VALUE a = Qnil;
+  volatile VALUE r;
+
+  r = rb_yield(Qnil);
+  if (RTEST(r)) {
+    size_t backpos;
+    P;
+    rb_scan_args(argc, argv, "01", &a);
+    if (a == Qnil) {
+      a = rb_ary_new();
+    }
+
+    rb_funcall(a, rb_intern("<<"), 1, r);
+    for (;;) {
+      zscan_push(self);
+      backpos = p->bytepos;
+      r = rb_yield(Qnil);
+      if (RTEST(r) && backpos != p->bytepos) {
+        rb_funcall(a, rb_intern("<<"), 1, r);
+        zscan_drop(self);
+      } else {
+        zscan_pop(self);
+        break;
+      }
+    }
+    return a;
+  } else {
+    return Qnil;
+  }
 }
 
 void Init_zscan() {
@@ -295,5 +375,9 @@ void Init_zscan() {
   rb_define_method(zscan, "drop", zscan_drop, 0);
   rb_define_method(zscan, "restore", zscan_restore, 0);
   rb_define_method(zscan, "clear_pos_stack", zscan_clear_pos_stack, 0);
+  
   rb_define_method(zscan, "try", zscan_try, 0);
+  rb_define_method(zscan, "zero_or_one", zscan_zero_or_one, -1);
+  rb_define_method(zscan, "zero_or_more", zscan_zero_or_more, -1);
+  rb_define_method(zscan, "one_or_more", zscan_one_or_more, -1);
 }

@@ -56,6 +56,24 @@ See also https://bugs.ruby-lang.org/issues/7092
 - `#string` note: return a dup. Don't worry the performance because it is a copy-on-write string.
 - `#rest`
 
+## String delegates
+
+For convienience
+
+- `#<< append_string`
+- `#[]= range, replace_string` note: if `range` starts before pos, moves pos left, also clears the stack.
+- `#size`
+- `#bytesize`
+
+## Parsing combinators
+
+Combinators that manage scanner pos and stack state for you. In the combinators, if the returned value of the given block is `nil` or `false`, stops iteration. Can be nested, useful for building parsers.
+
+- `#try &block` returns `block`'s return.
+- `#zero_or_one result=[], &block` try to execute 0 or 1 time, returns `result`.
+- `#zero_or_more result=[], &block` try to execute 0 or more times, also stops iteration if scanner no advance, returns `result`.
+- `#one_or_more result=[], &block` try to execute 1 or more times, also stops iteration if scanner no advance, returns `nil` or `result`.
+
 ## Pos management
 
 - `#pos`
@@ -66,21 +84,13 @@ See also https://bugs.ruby-lang.org/issues/7092
 - `#reset` go to beginning.
 - `#terminate` go to end of string.
 
-## Efficient pos stack manipulation
+## (Low level) Efficient pos stack manipulation
 
 - `#push` push current pos into the stack.
 - `#pop` set current pos to top of the stack, and pop it.
 - `#drop` drop top of pos stack without changing current pos.
 - `#restore` set current pos to top of the stack.
 - `#clear_pos_stack` clear pos stack.
-- `#try` try to do several scans in the given block, fall back to init pos if block returns `nil` or `false`. Returns block's return, can be nested.
-
-## String delegates
-
-- `#<< append_string`
-- `#[]= range, replace_string` note: if `range` starts before pos, moves pos left, also clears the stack.
-- `#size`
-- `#bytesize`
 
 ## License
 
