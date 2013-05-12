@@ -57,6 +57,10 @@ class ZScan
     _internal_string.bytesize
   end
 
+  def line_index
+    _internal_string.byteslice(0, bytepos).count "\n"
+  end
+
   private :_internal_init, :_internal_string
 end
 

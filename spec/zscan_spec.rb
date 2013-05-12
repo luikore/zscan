@@ -71,4 +71,24 @@ describe ZScan do
     @z.pop
     assert_equal 3, @z.pos
   end
+
+  it "#reset, #terminate and #line_index" do
+    z = ZScan.new ''
+    assert_equal 0, z.line_index
+    z.terminate
+    assert_equal 0, z.line_index
+    z.reset
+    assert_equal 0, z.line_index
+
+    z = ZScan.new "a\nb\nc"
+    assert_equal 0, z.line_index
+    z.terminate
+    assert_equal 2, z.line_index
+    z.reset
+    assert_equal 0, z.line_index
+    z.pos = 1
+    assert_equal 0, z.line_index
+    z.pos = 2
+    assert_equal 1, z.line_index
+  end
 end

@@ -80,6 +80,7 @@ Combinators that manage scanner pos and stack state for you. In the combinators,
 - `#pos= new_pos` note: complexity ~ `new_pos > pos ? new_pos - pos : new_pos`.
 - `#bytepos`
 - `#bytepos= new_bytepos` note: complexity ~ `abs(new_bytepos - bytepos)`.
+- `#line_index` line index of current position, start from `0`.
 - `#advance n` move forward `n` codepoints, if `n < 0`, move backward. Stops at beginning or end.
 - `#reset` go to beginning.
 - `#terminate` go to end of string.
