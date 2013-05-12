@@ -3,16 +3,16 @@
 #include <ruby/encoding.h>
 
 typedef struct {
-  size_t pos;
-  size_t bytepos;
+  long pos;
+  long bytepos;
 } Pos;
 
 typedef struct {
-  size_t pos;
-  size_t bytepos;
+  long pos;
+  long bytepos;
   VALUE s;
-  size_t stack_i;
-  size_t stack_cap;
+  long stack_i;
+  long stack_cap;
   Pos* stack;
 } ZScan;
 
@@ -66,13 +66,12 @@ static VALUE zscan_pos(VALUE self) {
 
 static VALUE zscan_advance(VALUE self, VALUE v_diff) {
   P;
-  long signed_n = p->pos + NUM2LONG(v_diff);
-  if (signed_n < 0) {
+  long n = p->pos + NUM2LONG(v_diff);
+  if (n < 0) {
     p->pos = 0;
     p->bytepos = 0;
     return self;
   }
-  size_t n = signed_n;
 
   // because there's no "reverse scan" API, we have a O(n) routine :(
   if (n < p->pos) {
@@ -82,7 +81,7 @@ static VALUE zscan_advance(VALUE self, VALUE v_diff) {
 
   if (n > p->pos) {
     rb_encoding* enc = rb_enc_get(p->s);
-    size_t byteend = RSTRING_LEN(p->s);
+    long byteend = RSTRING_LEN(p->s);
     char* ptr = RSTRING_PTR(p->s);
     for (; p->pos < n && p->bytepos < byteend;) {
       int n = rb_enc_mbclen(ptr + p->bytepos, ptr + byteend, enc);
@@ -105,7 +104,7 @@ static VALUE zscan_bytepos(VALUE self) {
 static VALUE zscan_bytepos_eq(VALUE self, VALUE v_bytepos) {
   P;
   long signed_bytepos = NUM2LONG(v_bytepos);
-  size_t from, to, bytepos;
+  long from, to, bytepos;
 
   if (signed_bytepos > RSTRING_LEN(p->s)) {
     bytepos = RSTRING_LEN(p->s);
@@ -127,7 +126,7 @@ static VALUE zscan_bytepos_eq(VALUE self, VALUE v_bytepos) {
 
   rb_encoding* enc = rb_enc_get(p->s);
   char* ptr = RSTRING_PTR(p->s);
-  size_t diff = 0;
+  long diff = 0;
   for (; from < to;) {
     int n = rb_enc_mbclen(ptr + from, ptr + to, enc);
     if (n) {
@@ -154,7 +153,7 @@ static VALUE zscan_bytepos_eq(VALUE self, VALUE v_bytepos) {
 
 static VALUE zscan_eos_p(VALUE self) {
   P;
-  return (p->bytepos == (size_t)RSTRING_LEN(p->s) ? Qtrue : Qfalse);
+  return (p->bytepos == RSTRING_LEN(p->s) ? Qtrue : Qfalse);
 }
 
 regex_t *rb_reg_prepare_re(VALUE re, VALUE str);
@@ -303,7 +302,7 @@ static VALUE zscan_zero_or_more(int argc, VALUE* argv, VALUE self) {
   REQUIRE_BLOCK;
   volatile VALUE a = Qnil;
   volatile VALUE r;
-  size_t backpos;
+  long backpos;
   P;
   rb_scan_args(argc, argv, "01", &a);
   if (a == Qnil) {
@@ -331,7 +330,7 @@ static VALUE zscan_one_or_more(int argc, VALUE* argv, VALUE self) {
 
   r = rb_yield(Qnil);
   if (RTEST(r)) {
-    size_t backpos;
+    long backpos;
     P;
     rb_scan_args(argc, argv, "01", &a);
     if (a == Qnil) {
