@@ -1,0 +1,3 @@
+[submodule "ext/fmemopen"]
+	path = ext/fmemopen
+	url = https://github.com/jverkoey/fmemopen
