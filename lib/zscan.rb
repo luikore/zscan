@@ -28,7 +28,7 @@ class ZScan
     r = try do
       negative = (scan(/[+\-]/) == '-')
       if radix.nil?
-        radix = 
+        radix =
           if scan(/0b/i)
             2
           elsif scan(/0x/i)
@@ -59,6 +59,23 @@ class ZScan
     if r
       r = r.to_i radix
       negative ? -r : r
+    end
+  end
+
+  def scan_date format, start=Date::ITALY
+    s = rest
+    d = DateTime._strptime s, format
+    if d
+      # XXX 2 need parses because the handling is very complex ...
+      dt = DateTime.strptime s, format, start rescue return nil
+
+      len = s.bytesize
+      if leftover = d[:leftover]
+        len -= leftover.bytesize
+      end
+      self.bytepos += len
+
+      dt
     end
   end
 

@@ -62,7 +62,7 @@ See also https://bugs.ruby-lang.org/issues/7092
 - `#match_bytesize regexp_or_string` return length of matched bytes or `nil`.
 - `#scan_float` scan a float number which is not starting with space. It deals with multibyte encodings for you.
 - `#scan_int radix=nil` if radix is nil, decide base by prefix: `0x` is 16, `0` is 8, `0b` is 2, otherwise 10. `radix` should be in range `2..36`.
-- `#scan_date format_string` see also [strptime](http://rubydoc.info/stdlib/date/DateTime.strptime).
+- `#scan_date format_string, start=Date::ITALY` scan a `DateTime` object, see also [strptime](http://rubydoc.info/stdlib/date/DateTime.strptime).
 - `#unpack format_string` scan with [unpack](http://rubydoc.info/stdlib/core/String:unpack), for binary parsing.
 - `#eos?`
 - `#string` note: return a dup. Don't worry the performance because it is a copy-on-write string.

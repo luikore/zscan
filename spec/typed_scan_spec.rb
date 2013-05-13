@@ -24,4 +24,18 @@ describe "typed scan" do
     z.advance 1
     assert_equal -3.5e23, z.scan_float
   end
+
+  it "#scan_date" do
+    z = Zscan.new " 2001 04 6 04 05 06 +7 231rest"
+    assert_equal nil, z.scan_date('%Y %U %w %H %M %S %z %N')
+    z.advance 1
+
+    d = z.scan_date '%Y %U %w %H %M %S %z %N'
+    assert_equal 0.231, d.sec_fraction
+    assert_equal 'rest', z.rest
+
+    z.pos = 1
+    z.scan_date '%Y %U %w ahoy %H %M %S %z' # bad format
+    assert_equal 1, z.pos
+  end
 end
