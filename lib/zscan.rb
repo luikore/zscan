@@ -1,10 +1,16 @@
 require_relative "../ext/zscan"
+require "date"
 
 class ZScan
   VERSION = '1.0.1'
 
   def initialize s, dup=false
-    _internal_init dup ? s.dup : s
+    if s.encoding.ascii_compatible?
+      s = dup ? s.dup : s
+    else
+      s = s.encode 'utf-8'
+    end
+    _internal_init s
   end
 
   def string
@@ -14,6 +20,45 @@ class ZScan
   def skip re_or_str
     if sz = match_bytesize(re_or_str)
       self.bytepos += sz
+    end
+  end
+
+  def scan_int radix=nil
+    negative = false
+    r = try do
+      negative = (scan(/[+\-]/) == '-')
+      if radix.nil?
+        radix = 
+          if scan(/0b/i)
+            2
+          elsif scan(/0x/i)
+            16
+          elsif scan('0')
+            8
+          else
+            10
+          end
+      end
+      scan \
+        case radix
+        when 2;  /[01]+/
+        when 8;  /[0-7]+/
+        when 10; /\d+/
+        when 16; /\h+/i
+        else
+          if radix < 10
+            /[0-#{radix}]+/
+          elsif radix > 36
+            raise ArgumentError, "invalid radix #{radix}"
+          else
+            end_char = ('a'.ord + (radix - 11)).chr
+            /[\da-#{end_char}]+/i
+          end
+        end
+    end
+    if r
+      r = r.to_i radix
+      negative ? -r : r
     end
   end
 

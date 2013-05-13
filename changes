@@ -1,3 +1,5 @@
+2013-05-13
+  add #scan_int and #scan_float
 2013-05-12
   add parsing combinators #zero_or_one, #zero_or_more, and #one_or_more
   add #line_index

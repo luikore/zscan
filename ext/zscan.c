@@ -1,6 +1,7 @@
 #include <ruby/ruby.h>
 #include <ruby/re.h>
 #include <ruby/encoding.h>
+#include <ctype.h>
 
 typedef struct {
   long pos;
@@ -356,6 +357,27 @@ static VALUE zscan_one_or_more(int argc, VALUE* argv, VALUE self) {
   }
 }
 
+VALUE zscan_scan_float(VALUE self) {
+  P;
+  if (RSTRING_LEN(p->s) == p->bytepos) {
+    return Qnil;
+  }
+
+  char* s = RSTRING_PTR(p->s) + p->bytepos;
+  if (isspace(s[0])) {
+    return Qnil;
+  }
+  char* e;
+  double d = strtod(s, &e);
+  if (e == s || e - s > RSTRING_LEN(p->s) - p->bytepos) {
+    return Qnil;
+  } else {
+    // it ok to use advance because the source is ascii compatible
+    zscan_advance(self, LONG2NUM(e - s));
+    return DBL2NUM(d);
+  }
+}
+
 void Init_zscan() {
   VALUE zscan = rb_define_class("ZScan", rb_cObject);
   rb_define_alloc_func(zscan, zscan_alloc);
@@ -374,9 +396,11 @@ void Init_zscan() {
   rb_define_method(zscan, "drop", zscan_drop, 0);
   rb_define_method(zscan, "restore", zscan_restore, 0);
   rb_define_method(zscan, "clear_pos_stack", zscan_clear_pos_stack, 0);
-  
+
   rb_define_method(zscan, "try", zscan_try, 0);
   rb_define_method(zscan, "zero_or_one", zscan_zero_or_one, -1);
   rb_define_method(zscan, "zero_or_more", zscan_zero_or_more, -1);
   rb_define_method(zscan, "one_or_more", zscan_one_or_more, -1);
+
+  rb_define_method(zscan, "scan_float", zscan_scan_float, 0);
 }

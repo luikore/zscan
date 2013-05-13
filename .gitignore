@@ -3,4 +3,3 @@
 *.so
 *.bundle
 *.gem
-ext/fmemopen.*

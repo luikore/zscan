@@ -4,6 +4,8 @@
 - `ZScan#pos` is the codepoint position, and `ZScan#bytepos` is byte position.
 - Correctly scans anchors and look behind predicates.
 - Pos stack manipulation.
+- Fast typed scanning methods: `#scan_float`, `#scan_int radix=nil`, `#scan_date format`.
+- `#unpack` for binary parsing (when dealing with binary protocols, maybe better start with binary encoding: `ZScan.new some_string.b`).
 
 ## Install
 
@@ -22,7 +24,7 @@ z.scan /\w+/   #=> 'world'
 z.eos?         #=> true
 ```
 
-## Motivation
+## Motivation 1
 
 Ruby's stdlib `StringScanner` treats the scanning position as beginning of string:
 
@@ -46,12 +48,22 @@ z.scan /^/     #=> nil
 
 See also https://bugs.ruby-lang.org/issues/7092
 
+## Motivation 2
+
+- We have many different scanning methods: `unpack`, `stfptime`... they should be able to be combined together.
+- For scan and convert, ruby's stdlib `Scanf` is slow (creates regexp array everytime called) and not possible to corporate with scanner.
+- A JIT-enabled binary scanner would be super cool (not implemented yet).
+
 ## Essential methods
 
 - `ZScan.new string, dup=false`
 - `#scan regexp_or_string`
 - `#skip regexp_or_string`
 - `#match_bytesize regexp_or_string` return length of matched bytes or `nil`.
+- `#scan_float` scan a float number which is not starting with space. It deals with multibyte encodings for you.
+- `#scan_int radix=nil` if radix is nil, decide base by prefix: `0x` is 16, `0` is 8, `0b` is 2, otherwise 10. `radix` should be in range `2..36`.
+- `#scan_date format_string` see also [strptime](http://rubydoc.info/stdlib/date/DateTime.strptime).
+- `#unpack format_string` scan with [unpack](http://rubydoc.info/stdlib/core/String:unpack), for binary parsing.
 - `#eos?`
 - `#string` note: return a dup. Don't worry the performance because it is a copy-on-write string.
 - `#rest`
