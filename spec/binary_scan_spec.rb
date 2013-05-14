@@ -1,6 +1,6 @@
 require_relative "spec_helper"
 
-describe ZScan do
+describe 'ZScan binary scanning methods' do
   it "#unpack" do
     z = ZScan.new "\x01\x02\x03"
     assert_raise ArgumentError do

@@ -1,6 +1,6 @@
 require_relative "spec_helper"
 
-describe ZScan do
+describe 'ZScan combinators' do
   it "#try restores pos" do
     z = ZScan.new "hello"
     return1 = z.try do

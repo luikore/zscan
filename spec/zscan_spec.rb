@@ -5,10 +5,6 @@ describe ZScan do
     @z = ZScan.new 'ab你好'
   end
 
-  before :all do
-    GC.stress = true
-  end
-
   it "random workflow" do
     assert_equal 2, @z.match_bytesize('ab')
     @z.pos = 4
