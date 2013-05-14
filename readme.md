@@ -107,36 +107,50 @@ Combinators that manage scanner pos and stack state for you. In the combinators,
 
 ## `ZScan::BinarySpec`
 
-For binary protocol parsing. Example:
+Specify a sequence of binary data. Designed for binary protocol parsing. Example:
 
 ```ruby
 # create a ZScan::BinarySpec
 s = ZScan.binary_spec do
-  int8
-  uint32 :le, 2 # 2 times
-  double 1, :be # order doesn' matter
+  int8        # once
+  uint32_le 2 # little endian, twice
+  double_be 1 # big endian, once
 end
-s.parse [-1, 2, 3, 4.0].pack('cI<2G') #=> [-1, 2, 3, 4.0]
+z = ZScan.new [-1, 2, 3, 4.0].pack('cI<2G') + "rest"
+z.scan_binary s #=> [-1, 2, 3, 4.0]
+z.rest #=> 'rest
 ```
 
-Instruction list:
+Integer instructions:
 
 ```ruby
 int8  uint8
-int16 uint16
-int32 uint32
-int64 uint64
-single
-double
+int16 uint16 int16_le uint16_le int16_be uint16_be
+int32 uint32 int32_le uint32_le int32_be uint32_be
+int64 uint64 int64_le uint64_le int64_be uint64_be
 ```
 
-Endian list:
+Single precision float instructions:
 
-- `:ne` native endian, this is default
-- `:le` little endian (VAX, x86)
-- `:be` big endian, network endian (SPARC)
+```ruby
+single single_le single_be
+```
 
-Performance vs `String#unpack`:
+Double precision float instructions:
+
+```ruby
+double double_le double_be
+```
+
+Endians:
+
+- (without endian suffix) native endian
+- `*_le` little endian (VAX, x86, Windows string code unit)
+- `*_be` big endian, network endian (SPARC, Java string code unit)
+
+Repeat count must be integer `>= 1`, default is `1`.
+
+It is implemented as a direct-threaded bytecode interpreter. Performance vs `String#unpack`:
 
 todo
 

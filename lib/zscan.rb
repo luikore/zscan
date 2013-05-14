@@ -1,4 +1,5 @@
 require_relative "../ext/zscan"
+require_relative "zscan/instructions"
 require "date"
 
 class ZScan
@@ -135,6 +136,23 @@ class ZScan
 
   def line_index
     _internal_string.byteslice(0, bytepos).count "\n"
+  end
+
+  def self.binary_spec &p
+    bs = BinarySpec.new
+    bs.instance_eval &p
+    bs.instance_variable_get(:@code) << BinarySpec::RET
+    bs
+  end
+
+  class BinarySpec
+    BLANK = ''.force_encoding 'binary'
+
+    def initialize
+      @code = BLANK.dup
+      @a_size = 0
+      @s_size = 0
+    end
   end
 
   private :_internal_init, :_internal_string

@@ -3,6 +3,6 @@ require 'rspec/autorun'
 RSpec.configure do |config|
   config.expect_with :stdlib
   config.before :all do
-    GC.stress = true
+    # GC.stress = true
   end
 end
