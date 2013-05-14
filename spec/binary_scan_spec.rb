@@ -17,9 +17,10 @@ describe 'ZScan binary scanning methods' do
       int8        # once
       uint32_le 2 # little endian, twice
       double_be 1 # big endian, once
+      single 1
     end
-    a = [-1, 2, 3, 4.0]
-    z = ZScan.new(a.pack('cI<2G') + 'rest')
+    a = [-1, 2, 3, 4.0, 3.0]
+    z = ZScan.new(a.pack('cI<2Gf') + 'rest')
     b = z.scan_binary s
     assert_equal 'rest', z.rest
     assert_equal a, b

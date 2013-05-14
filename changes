@@ -1,5 +1,8 @@
+
+1.1
+
 2013-05-14
-  add binary scan method #unpack
+  add binary scan method #unpack and #scan_binary
 2013-05-13
   add typed scan methods #scan_int, #scan_float and #scan_date
 2013-05-12

@@ -3,7 +3,7 @@ require_relative "zscan/instructions"
 require "date"
 
 class ZScan
-  VERSION = '1.0.1'
+  VERSION = '1.1'
 
   def initialize s, dup=false
     if s.encoding.ascii_compatible?

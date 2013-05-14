@@ -28,21 +28,31 @@ def bspec_c_type ins
   else; raise 'bad'
   end
 end
-def bspec_convert ins
+def bspec_extract ins
   type = bspec_c_type ins
-  r = "((#{type}*)s)[0]"
+  len = bspec_incr(ins) * 8
+  r = "((uint#{len}_t*)s)[0]"
   if ins.end_with?('SWAP')
-    r = "swap#{bspec_incr(ins) * 8}(#{r})"
+    r = "swap#{len}(#{r})"
   end
+  "uint#{len}_t r = #{r}"
+end
+def bspec_convert ins
   case ins
-  when /(U?)INT64/, /UINT32/
-    "#{$1}INT64toNUM(#{r})"
+  when /(U)?INT64|UINT32/
+    if ins.start_with?('U')
+      "UINT64toNUM(r)"
+    else
+      "INT64toNUM(CAST(r, int64_t))"
+    end
   when /INT32/
-    "INT2NUM(#{r})"
+    "INT2NUM(CAST(r, int32_t))"
   when /INT(16|8)/
-    "INT2FIX(#{r})"
-  when /SINGLE|DOUBLE/
-    "DBL2NUM((double)#{r})"
+    "INT2FIX(CAST(r, #{bspec_c_type ins}))"
+  when /SINGLE/
+    "DBL2NUM((double)CAST(r, float))"
+  when /DOUBLE/
+    "DBL2NUM(CAST(r, double))"
   else
     raise 'bad'
   end
@@ -86,9 +96,12 @@ file 'ext/bspec_exec.inc' => __FILE__ do
 
   opcode_segs = bspec_insns.map do |ins|
 %Q{BS_#{ins}:
-  rb_ary_push(a, #{bspec_convert ins});
-  s += #{bspec_incr ins};
-  goto **(ip++);}
+  {
+    #{bspec_extract ins};
+    rb_ary_push(a, #{bspec_convert ins});
+    s += #{bspec_incr ins};
+    goto **(ip++);}
+  }
   end.join "\n"
 
   File.open 'ext/bspec_exec.inc', 'w' do |f|
@@ -149,7 +162,8 @@ file 'lib/zscan/instructions.rb' => __FILE__ do
     f.puts "    alias #{ins}_be #{ins}_swap"
     end
     f.puts "  end"
-    f.puts "  undef #{alias_ins.join ', '}"
+    swap_ins = alias_ins.map{|ins| "#{ins}_swap"}
+    f.puts "  undef #{swap_ins.join ', '}"
     f.puts "end"
   end
 end

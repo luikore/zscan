@@ -433,6 +433,8 @@ static VALUE bspec_big_endian_p(VALUE self) {
 #define INT64toNUM(x) (sizeof(long) == 8 ? LONG2NUM(x) : LL2NUM(x))
 #define UINT64toNUM(x) (sizeof(long) == 8 ? ULONG2NUM(x) : ULL2NUM(x))
 
+#define CAST(var, ty) *((ty*)(&(var)))
+
 #include "bspec_exec.inc"
 
 static VALUE zscan_scan_binary(VALUE self, VALUE spec) {
@@ -444,7 +446,9 @@ static VALUE zscan_scan_binary(VALUE self, VALUE spec) {
   long a_size = NUM2LONG(rb_iv_get(spec, "@a_size"));
   volatile VALUE a = rb_ary_new2(a_size);
   VALUE code = rb_iv_get(spec, "@code");
-  return bspec_exec((void**)RSTRING_PTR(code), RSTRING_PTR(p->s) + p->bytepos, a);
+  bspec_exec((void**)RSTRING_PTR(code), RSTRING_PTR(p->s) + p->bytepos, a);
+  zscan_bytepos_eq(self, LONG2NUM(p->bytepos + s_size));
+  return a;
 }
 
 void Init_zscan() {
