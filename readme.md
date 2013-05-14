@@ -4,8 +4,7 @@
 - `ZScan#pos` is the codepoint position, and `ZScan#bytepos` is byte position.
 - Correctly scans anchors and look behind predicates.
 - Pos stack manipulation.
-- Fast typed scanning methods: `#scan_float`, `#scan_int radix=nil`, `#scan_date format`.
-- `#unpack` for binary parsing (when dealing with binary protocols, maybe better start with binary encoding: `ZScan.new some_string.b`).
+- Typed scanning methods: `#scan_float`, `#scan_int radix=nil`, `#scan_date format`, `#scan_binary format`.
 
 ## Install
 
@@ -24,7 +23,7 @@ z.scan /\w+/   #=> 'world'
 z.eos?         #=> true
 ```
 
-## Motivation 1
+## Motivation - `StringScanner`
 
 Ruby's stdlib `StringScanner` treats the scanning position as beginning of string:
 
@@ -48,11 +47,11 @@ z.scan /^/     #=> nil
 
 See also https://bugs.ruby-lang.org/issues/7092
 
-## Motivation 2
+## Other motivations - `scanf` / `strptime` / `unpack`
 
-- We have many different scanning methods: `unpack`, `stfptime`... they should be able to be combined together.
 - For scan and convert, ruby's stdlib `Scanf` is slow (creates regexp array everytime called) and not possible to corporate with scanner.
-- A JIT-enabled binary scanner would be super cool (not implemented yet).
+- For date parsing, `strptime` doesn't tell the parsed length.
+- For binary parsing, `unpack` is an slow interpreter, and the instructions are quite irregular.
 
 ## Essential methods
 
@@ -63,7 +62,8 @@ See also https://bugs.ruby-lang.org/issues/7092
 - `#scan_float` scan a float number which is not starting with space. It deals with multibyte encodings for you.
 - `#scan_int radix=nil` if radix is nil, decide base by prefix: `0x` is 16, `0` is 8, `0b` is 2, otherwise 10. `radix` should be in range `2..36`.
 - `#scan_date format_string, start=Date::ITALY` scan a `DateTime` object, see also [strptime](http://rubydoc.info/stdlib/date/DateTime.strptime).
-- `#unpack format_string` scan with [unpack](http://rubydoc.info/stdlib/core/String:unpack), for binary parsing.
+- `#scan_binary binary_spec` optimized and readable binary scan, see below for how to create a `ZScan::BinarySpec`.
+- `#unpack format_string`
 - `#eos?`
 - `#string` note: return a dup. Don't worry the performance because it is a copy-on-write string.
 - `#rest`
@@ -104,6 +104,41 @@ Combinators that manage scanner pos and stack state for you. In the combinators,
 - `#drop` drop top of pos stack without changing current pos.
 - `#restore` set current pos to top of the stack.
 - `#clear_pos_stack` clear pos stack.
+
+## `ZScan::BinarySpec`
+
+For binary protocol parsing. Example:
+
+```ruby
+# create a ZScan::BinarySpec
+s = ZScan.binary_spec do
+  int8
+  uint32 :le, 2 # 2 times
+  double 1, :be # order doesn' matter
+end
+s.parse [-1, 2, 3, 4.0].pack('cI<2G') #=> [-1, 2, 3, 4.0]
+```
+
+Instruction list:
+
+```ruby
+int8  uint8
+int16 uint16
+int32 uint32
+int64 uint64
+single
+double
+```
+
+Endian list:
+
+- `:ne` native endian, this is default
+- `:le` little endian (VAX, x86)
+- `:be` big endian, network endian (SPARC)
+
+Performance vs `String#unpack`:
+
+todo
 
 ## License
 

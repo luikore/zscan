@@ -66,7 +66,7 @@ class ZScan
     s = rest
     d = DateTime._strptime s, format
     if d
-      # XXX 2 need parses because the handling is very complex ...
+      # XXX need 2 parses because the handling is very complex ...
       dt = DateTime.strptime s, format, start rescue return nil
 
       len = s.bytesize
@@ -77,6 +77,20 @@ class ZScan
 
       dt
     end
+  end
+
+  def unpack format
+    if format.index('@')
+      raise ArgumentError, 'position instruction @ not supported'
+    end
+    r = rest.unpack format
+    if r.index(nil)
+      return
+    end
+    # XXX pack to get parsed length because no related API is exposed ...
+    len = r.pack(format).bytesize
+    self.bytepos += len
+    r
   end
 
   def pos= new_pos
