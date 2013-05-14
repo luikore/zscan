@@ -25,6 +25,13 @@ describe "typed scan" do
     assert_equal -3.5e23, z.scan_float
   end
 
+  it "won't overflow in #scan_float" do
+    s = '1.23E15'.byteslice 0, 4
+    z = Zscan.new s
+    assert_equal 1.23, z.scan_float
+    assert_equal 4, z.pos
+  end
+
   it "#scan_date" do
     z = Zscan.new " 2001 04 6 04 05 06 +7 231rest"
     assert_equal nil, z.scan_date('%Y %U %w %H %M %S %z %N')
