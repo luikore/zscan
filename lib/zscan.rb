@@ -150,7 +150,6 @@ class ZScan
 
     def initialize
       @code = BLANK.dup
-      @a_size = 0
       @s_size = 0
     end
   end

@@ -1,5 +1,5 @@
 require "strscan"
-require_relative "lib/zscan"
+require_relative "../lib/zscan"
 require "benchmark"
 
 s = "word\n"

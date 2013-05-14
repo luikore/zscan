@@ -443,9 +443,9 @@ static VALUE zscan_scan_binary(VALUE self, VALUE spec) {
   if (p->bytepos + s_size > RSTRING_LEN(p->s)) {
     return Qnil;
   }
-  long a_size = NUM2LONG(rb_iv_get(spec, "@a_size"));
-  volatile VALUE a = rb_ary_new2(a_size);
   VALUE code = rb_iv_get(spec, "@code");
+  long a_size = RSTRING_LEN(code) / sizeof(void*);
+  volatile VALUE a = rb_ary_new2(a_size);
   bspec_exec((void**)RSTRING_PTR(code), RSTRING_PTR(p->s) + p->bytepos, a);
   zscan_bytepos_eq(self, LONG2NUM(p->bytepos + s_size));
   return a;

@@ -100,8 +100,9 @@ file 'ext/bspec_exec.inc' => __FILE__ do
     #{bspec_extract ins};
     rb_ary_push(a, #{bspec_convert ins});
     s += #{bspec_incr ins};
-    goto **(ip++);}
+    goto **(ip++);
   }
+}
   end.join "\n"
 
   File.open 'ext/bspec_exec.inc', 'w' do |f|
@@ -143,7 +144,6 @@ file 'lib/zscan/instructions.rb' => __FILE__ do
     raise ArgumentError, "repeat count should be >= 1, but got \#{n}" if n < 1
     n.times do
       @code << #{ins}
-      @a_size += 1
       @s_size += #{bspec_incr ins}
     end
   end
