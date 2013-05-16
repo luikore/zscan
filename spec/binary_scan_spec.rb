@@ -1,3 +1,4 @@
+# coding: utf-8
 require_relative "spec_helper"
 
 describe 'ZScan binary scanning methods' do
@@ -11,7 +12,7 @@ describe 'ZScan binary scanning methods' do
     assert_equal nil, (z.unpack 'I')
     assert_equal 2, z.pos
   end
-  
+
   it "#scan_binary" do
     s = ZScan.binary_spec do
       int8        # once
@@ -19,6 +20,7 @@ describe 'ZScan binary scanning methods' do
       double_be 1 # big endian, once
       single 1
     end
+
     a = [-1, 2, 3, 4.0, 3.0]
     z = ZScan.new(a.pack('cI<2Gf') + 'rest')
     b = z.scan_binary s

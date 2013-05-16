@@ -2,6 +2,50 @@
 
 static const rb_data_type_t* zscan_type;
 
+typedef struct {
+  long s_size;
+  long a_size;
+  long a_cap;
+  void** code;
+} BSpec;
+
+static void bspec_free(void* pp) {
+  BSpec* p = pp;
+  free(p->code);
+  free(p);
+}
+
+static size_t bspec_memsize(const void* pp) {
+  const BSpec* p = pp;
+  return p ? sizeof(*p) : 0;
+}
+
+static const rb_data_type_t bspec_type = {
+  "ZScan::BinarySpec",
+  {NULL, bspec_free, bspec_memsize}
+};
+
+static VALUE bspec_alloc(VALUE klass) {
+  BSpec* bs = (BSpec*)malloc(sizeof(BSpec));
+  bs->s_size = 0;
+  bs->a_cap = 4;
+  bs->a_size = 0;
+  bs->code = (void**)malloc(bs->a_cap * sizeof(void*));
+  return TypedData_Wrap_Struct(klass, &bspec_type, bs);
+}
+
+static VALUE bspec_append(VALUE self, VALUE v_code, VALUE v_s_size) {
+  BSpec* bs = rb_check_typeddata(self, &bspec_type);
+  if (bs->a_size == bs->a_cap) {
+    bs->a_cap *= 2;
+    bs->code = (void**)realloc(bs->code, bs->a_cap * sizeof(void*));
+  }
+  long s_size = NUM2LONG(v_s_size);
+  bs->code[bs->a_size++] = ((void**)RSTRING_PTR(v_code))[0];
+  bs->s_size += s_size;
+  return self;
+}
+
 static VALUE bspec_big_endian_p(VALUE self) {
 # ifdef DYNAMIC_ENDIAN
   /* for universal binary of NEXTSTEP and MacOS X */
@@ -63,24 +107,29 @@ static VALUE zscan_scan_binary(VALUE self, VALUE spec) {
     rb_raise(rb_eRuntimeError, "encoding of source string should be ascii-compatible");
     return Qnil;
   }
-  long s_size = NUM2LONG(rb_iv_get(spec, "@s_size"));
+  BSpec* bs = rb_check_typeddata(spec, &bspec_type);
+  if (bs->a_size == 0) {
+    return rb_ary_new();
+  }
+  long s_size = bs->s_size;
   if (p->bytepos + s_size > RSTRING_LEN(p->s)) {
     return Qnil;
   }
-  VALUE code = rb_iv_get(spec, "@code");
-  long a_size = RSTRING_LEN(code) / sizeof(void*);
-  volatile VALUE a = rb_ary_new2(a_size);
-  bspec_exec((void**)RSTRING_PTR(code), RSTRING_PTR(p->s) + p->bytepos, a);
+  volatile VALUE a = rb_ary_new2(bs->a_size - 1);
+  bspec_exec(bs->code, RSTRING_PTR(p->s) + p->bytepos, a);
   p->bytepos += s_size;
   p->pos += s_size;
   return a;
 }
 
 void Init_zscan_bspec(VALUE zscan, const rb_data_type_t* _zscan_type) {
-  VALUE bs = rb_define_class_under(zscan, "BinarySpec", rb_cObject);
-  rb_define_singleton_method(bs, "big_endian?", bspec_big_endian_p, 0);
   zscan_type = _zscan_type;
   rb_define_method(zscan, "scan_binary", zscan_scan_binary, 1);
+
+  VALUE bs = rb_define_class_under(zscan, "BinarySpec", rb_cObject);
+  rb_define_singleton_method(bs, "big_endian?", bspec_big_endian_p, 0);
+  rb_define_alloc_func(bs, bspec_alloc);
+  rb_define_method(bs, "append", bspec_append, 2);
 
 # include "bspec_opcode_names.inc"
   void** opcodes = (void**)bspec_exec(NULL, NULL, Qnil);

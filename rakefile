@@ -143,8 +143,7 @@ file 'lib/zscan/instructions.rb' => __FILE__ do
   def #{ins.downcase} n=1
     raise ArgumentError, "repeat count should be >= 1, but got \#{n}" if n < 1
     n.times do
-      @code << #{ins}
-      @s_size += #{bspec_incr ins}
+      append #{ins}, #{bspec_incr ins}
     end
   end
       RUBY

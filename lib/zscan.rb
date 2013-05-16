@@ -141,17 +141,12 @@ class ZScan
   def self.binary_spec &p
     bs = BinarySpec.new
     bs.instance_eval &p
-    bs.instance_variable_get(:@code) << BinarySpec::RET
+    bs.send :append, BinarySpec::RET, 0
     bs
   end
 
   class BinarySpec
-    BLANK = ''.force_encoding 'binary'
-
-    def initialize
-      @code = BLANK.dup
-      @s_size = 0
-    end
+    private :append
   end
 
   private :_internal_init, :_internal_string
