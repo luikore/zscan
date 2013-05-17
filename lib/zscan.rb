@@ -139,7 +139,7 @@ class ZScan
   end
 
   def self.binary_spec &p
-    bs = BinarySpec.new
+    bs = BinarySpec.send :new
     bs.instance_eval &p
     bs.send :append, BinarySpec::RET, 0
     bs
@@ -147,6 +147,9 @@ class ZScan
 
   class BinarySpec
     private :append
+    class << self
+      private :new
+    end
   end
 
   private :_internal_init, :_internal_string
