@@ -23,7 +23,7 @@ z.scan /\w+/   #=> 'world'
 z.eos?         #=> true
 ```
 
-## Motivation - `StringScanner`
+## Motivation: string scanner
 
 Ruby's stdlib `StringScanner` treats the scanning position as beginning of string:
 
@@ -47,7 +47,7 @@ z.scan /^/     #=> nil
 
 See also https://bugs.ruby-lang.org/issues/7092
 
-## Other motivations - `scanf` / `strptime` / `unpack`
+## Other motivations
 
 - For scan and convert, ruby's stdlib `Scanf` is slow (creates regexp array everytime called) and not possible to corporate with scanner.
 - For date parsing, `strptime` doesn't tell the parsed length.
@@ -77,15 +77,6 @@ For convienience
 - `#size`
 - `#bytesize`
 
-## Parsing combinators
-
-Combinators that manage scanner pos and stack state for you. In the combinators, if the returned value of the given block is `nil` or `false`, stops iteration. Can be nested, useful for building parsers.
-
-- `#try &block` returns `block`'s return.
-- `#zero_or_one result=[], &block` try to execute 0 or 1 time, returns `result`.
-- `#zero_or_more result=[], &block` try to execute 0 or more times, also stops iteration if scanner no advance, returns `result`.
-- `#one_or_more result=[], &block` try to execute 1 or more times, also stops iteration if scanner no advance, returns `nil` or `result`.
-
 ## Pos management
 
 - `#pos`
@@ -105,7 +96,7 @@ Combinators that manage scanner pos and stack state for you. In the combinators,
 - `#restore` set current pos to top of the stack.
 - `#clear_pos_stack` clear pos stack.
 
-## `ZScan::BinarySpec`
+## Binary parsing
 
 Specify a sequence of binary data. Designed for binary protocol parsing. Example:
 
@@ -150,9 +141,16 @@ Endians:
 
 Repeat count must be integer `>= 1`, default is `1`.
 
-It is implemented as a direct-threaded bytecode interpreter. Performance vs `String#unpack`:
+It is implemented as a direct-threaded bytecode interpreter. A bit faster than `String#unpack`.
 
-todo
+## Parsing combinators
+
+Combinators that manage scanner pos and stack state for you. In the combinators, if the returned value of the given block is `nil` or `false`, stops iteration and restores scanner location. Can be nested, useful for building parsers.
+
+- `#try &block` returns `block`'s return.
+- `#zero_or_one acc=[], &block` try to execute 0 or 1 time, returns `acc`.
+- `#zero_or_more acc=[], &block` try to execute 0 or more times, also stops iteration if scanner no advance, returns `acc`.
+- `#one_or_more acc=[], &block` try to execute 1 or more times, also stops iteration if scanner no advance, returns `nil` or `acc`.
 
 ## License
 
