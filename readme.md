@@ -88,14 +88,6 @@ For convienience
 - `#reset` go to beginning.
 - `#terminate` go to end of string.
 
-## (Low level) Efficient pos stack manipulation
-
-- `#push` push current pos into the stack.
-- `#pop` set current pos to top of the stack, and pop it.
-- `#drop` drop top of pos stack without changing current pos.
-- `#restore` set current pos to top of the stack.
-- `#clear_pos_stack` clear pos stack.
-
 ## Binary parsing
 
 Specify a sequence of binary data. Designed for binary protocol parsing. Example:
@@ -151,6 +143,15 @@ Combinators that manage scanner pos and stack state for you. In the combinators,
 - `#zero_or_one acc=[], &block` try to execute 0 or 1 time, returns `acc`.
 - `#zero_or_more acc=[], &block` try to execute 0 or more times, also stops iteration if scanner no advance, returns `acc`.
 - `#one_or_more acc=[], &block` try to execute 1 or more times, also stops iteration if scanner no advance, returns `nil` or `acc`.
+
+## (Low level) Efficient pos stack manipulation
+
+- `#push` push current pos into the stack.
+- `#pop` set current pos to top of the stack, and pop it.
+- `#drop` drop top of pos stack without changing current pos.
+- `#restore` set current pos to top of the stack.
+- `#clear_pos_stack` clear pos stack.
+- `z.push._try expr` equivalent to `z.try{ expr }`, but faster because no block is required
 
 ## License
 

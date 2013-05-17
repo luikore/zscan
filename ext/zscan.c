@@ -264,6 +264,16 @@ static VALUE zscan_try(VALUE self) {
   return r;
 }
 
+// optimized version without pushing and block
+static VALUE zscan__try(VALUE self, VALUE r) {
+  if (RTEST(r)) {
+    zscan_drop(self);
+  } else {
+    zscan_pop(self);
+  }
+  return r;
+}
+
 static VALUE zscan_zero_or_one(int argc, VALUE* argv, VALUE self) {
   REQUIRE_BLOCK;
   volatile VALUE a = Qnil;
@@ -384,6 +394,7 @@ void Init_zscan() {
   rb_define_method(zscan, "clear_pos_stack", zscan_clear_pos_stack, 0);
 
   rb_define_method(zscan, "try", zscan_try, 0);
+  rb_define_method(zscan, "_try", zscan__try, 1);
   rb_define_method(zscan, "zero_or_one", zscan_zero_or_one, -1);
   rb_define_method(zscan, "zero_or_more", zscan_zero_or_more, -1);
   rb_define_method(zscan, "one_or_more", zscan_one_or_more, -1);
