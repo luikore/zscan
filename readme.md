@@ -59,6 +59,8 @@ See also https://bugs.ruby-lang.org/issues/7092
 - `#scan regexp_or_string`
 - `#skip regexp_or_string`
 - `#match_bytesize regexp_or_string` return length of matched bytes or `nil`.
+- `#slice n` slice sub string of n chars from current pos, advances the cursor.
+- `#byteslice n` slice sub string of n bytes from cursor pos, advances the cursor.
 - `#scan_float` scan a float number which is not starting with space. It deals with multibyte encodings for you.
 - `#scan_int radix=nil` if radix is nil, decide base by prefix: `0x` is 16, `0` is 8, `0b` is 2, otherwise 10. `radix` should be in range `2..36`.
 - `#scan_date format_string, start=Date::ITALY` scan a `DateTime` object, see also [strptime](http://rubydoc.info/stdlib/date/DateTime.strptime).

@@ -3,7 +3,7 @@ require_relative "zscan/instructions"
 require "date"
 
 class ZScan
-  VERSION = '1.2'
+  VERSION = '1.3'
 
   def initialize s, dup=false
     if s.encoding.ascii_compatible?
@@ -132,6 +132,18 @@ class ZScan
 
   def line_index
     _internal_string.byteslice(0, bytepos).count "\n"
+  end
+
+  def slice size
+    r = _internal_string.slice pos, size
+    advance size
+    r
+  end
+
+  def byteslice bytesize
+    r = _internal_string.byteslice bytepos, bytesize
+    self.bytepos += bytesize
+    r
   end
 
   def self.binary_spec &p

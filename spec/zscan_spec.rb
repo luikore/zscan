@@ -21,6 +21,13 @@ describe ZScan do
     assert_equal 8, @z.bytepos
   end
 
+  it "slices a certain bytes or chars" do
+    assert_equal 'ab', (@z.slice 2)
+    assert_equal '你', (@z.slice 1)
+    assert_equal '好', (@z.byteslice 3)
+    assert_equal true, @z.eos?
+  end
+
   it "scans from middle" do
     @z.bytepos = 2
     assert_equal '你', @z.scan('你')
