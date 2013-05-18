@@ -137,7 +137,6 @@ class ZScan
   def self.binary_spec &p
     bs = BinarySpec.send :new
     bs.instance_eval &p
-    bs.send :append, BinarySpec::RET, 0
     bs
   end
 

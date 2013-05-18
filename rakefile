@@ -86,7 +86,7 @@ file gem_package => gem_files do
 end
 
 desc "generate files"
-task :gen => %w[ext/bspec_exec.inc ext/bspec_opcode_names.inc lib/zscan/instructions.rb]
+task :gen => %w[ext/bspec_exec.inc ext/bspec_init.inc lib/zscan/instructions.rb]
 
 file 'ext/bspec_exec.inc' => __FILE__ do
   puts "generating ext/bspec_exec.inc"
@@ -122,13 +122,13 @@ BS_RET:
   end
 end
 
-file 'ext/bspec_opcode_names.inc' => __FILE__ do
-  puts 'generating ext/bspec_opcode_names.inc'
-  opcode_names = bspec_insns.map(&:inspect).join ', '
-  File.open 'ext/bspec_opcode_names.inc', 'w' do |f|
+file 'ext/bspec_init.inc' => __FILE__ do
+  puts 'generating ext/bspec_init.inc'
+  opcode_incrs = bspec_insns.map{|ins| bspec_incr ins}.join ', '
+  File.open 'ext/bspec_init.inc', 'w' do |f|
     f.puts "// GENERATED WITH: rake gen"
-    f.puts %Q|const char* bspec_opcode_names[] = {"RET", #{opcode_names}};|
-    f.puts %Q|long bspec_opcode_size = #{bspec_insns.size + 1};|
+    f.puts %Q|static const long bspec_s_sizes[] = {0, #{opcode_incrs}};|
+    f.puts %Q|static const long bspec_opcodes_size = #{bspec_insns.size + 1};|
   end
 end
 
@@ -138,12 +138,12 @@ file 'lib/zscan/instructions.rb' => __FILE__ do
     f.puts "# GENERATED WITH: rake gen"
     f.puts "class ZScan::BinarySpec"
 
-    bspec_insns.each do |ins|
+    bspec_insns.each_with_index do |ins, i|
       f.puts <<-RUBY
   def #{ins.downcase} n=1
     raise ArgumentError, "repeat count should be >= 1, but got \#{n}" if n < 1
     n.times do
-      append #{ins}, #{bspec_incr ins}
+      append #{i + 1}
     end
   end
       RUBY
