@@ -98,10 +98,6 @@ class ZScan
     advance new_pos - pos
   end
 
-  def rest
-    _internal_string.byteslice bytepos, _internal_string.bytesize
-  end
-
   def reset
     self.pos = 0
     self

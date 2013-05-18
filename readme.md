@@ -66,7 +66,9 @@ See also https://bugs.ruby-lang.org/issues/7092
 - `#unpack format_string`
 - `#eos?`
 - `#string` note: return a dup. Don't worry the performance because it is a copy-on-write string.
-- `#rest`
+- `#rest` rest unscanned sub string.
+- `#rest_size` count characters of unscanned sub string.
+- `#rest_bytesize` count bytes of unscanned sub string.
 
 ## String delegates
 

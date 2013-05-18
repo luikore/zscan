@@ -25,6 +25,8 @@ describe ZScan do
     @z.bytepos = 2
     assert_equal '你', @z.scan('你')
     assert_equal '好', @z.rest
+    assert_equal '好'.size, @z.rest_size
+    assert_equal '好'.bytesize, @z.rest_bytesize
   end
 
   it "won't overflow pos" do

@@ -69,10 +69,10 @@ static VALUE zscan_advance(VALUE self, VALUE v_diff) {
     long byteend = RSTRING_LEN(p->s);
     char* ptr = RSTRING_PTR(p->s);
     for (; p->pos < n && p->bytepos < byteend;) {
-      int n = rb_enc_mbclen(ptr + p->bytepos, ptr + byteend, enc);
-      if (n) {
+      int m = rb_enc_mbclen(ptr + p->bytepos, ptr + byteend, enc);
+      if (m) {
         p->pos++;
-        p->bytepos += n;
+        p->bytepos += m;
       } else {
         break;
       }
@@ -139,6 +139,35 @@ static VALUE zscan_bytepos_eq(VALUE self, VALUE v_bytepos) {
 static VALUE zscan_eos_p(VALUE self) {
   P;
   return (p->bytepos == RSTRING_LEN(p->s) ? Qtrue : Qfalse);
+}
+
+static VALUE zscan_rest(VALUE self) {
+  P;
+  return rb_funcall(p->s, rb_intern("byteslice"), 2, LONG2NUM(p->bytepos), LONG2NUM(RSTRING_LEN(p->s)));
+}
+
+static VALUE zscan_rest_size(VALUE self) {
+  P;
+  rb_encoding* enc = rb_enc_get(p->s);
+  char* ptr = RSTRING_PTR(p->s) + p->bytepos;
+  long len = RSTRING_LEN(p->s) - p->bytepos;
+
+  long sz = 0;
+  for (long i = 0; i < len;) {
+    long n = rb_enc_mbclen(ptr + i, ptr + len, enc);
+    if (n) {
+      sz++;
+      i += n;
+    } else {
+      rb_raise(rb_eRuntimeError, "failed to scan char");
+    }
+  }
+  return LONG2NUM(sz);
+}
+
+static VALUE zscan_rest_bytesize(VALUE self) {
+  P;
+  return LONG2NUM(RSTRING_LEN(p->s) - p->bytepos);
 }
 
 regex_t *rb_reg_prepare_re(VALUE re, VALUE str);
@@ -385,6 +414,10 @@ void Init_zscan() {
   rb_define_method(zscan, "bytepos=", zscan_bytepos_eq, 1);
   rb_define_method(zscan, "advance", zscan_advance, 1);
   rb_define_method(zscan, "eos?", zscan_eos_p, 0);
+  rb_define_method(zscan, "rest", zscan_rest, 0);
+  rb_define_method(zscan, "rest_size", zscan_rest_size, 0);
+  rb_define_method(zscan, "rest_bytesize", zscan_rest_bytesize, 0);
+
   rb_define_method(zscan, "match_bytesize", zscan_match_bytesize, 1);
   rb_define_method(zscan, "scan", zscan_scan, 1);
   rb_define_method(zscan, "push", zscan_push, 0);
