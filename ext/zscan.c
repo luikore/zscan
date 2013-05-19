@@ -86,7 +86,7 @@ static VALUE zscan_bytepos(VALUE self) {
   return ULONG2NUM(p->bytepos);
 }
 
-static VALUE zscan_bytepos_eq(VALUE self, VALUE v_bytepos) {
+VALUE zscan_bytepos_eq(VALUE self, VALUE v_bytepos) {
   P;
   long signed_bytepos = NUM2LONG(v_bytepos);
   long from, to, bytepos;
@@ -401,7 +401,6 @@ VALUE zscan_scan_float(VALUE self) {
   }
 }
 
-extern VALUE zscan_internal_unpack(VALUE str, VALUE fmt, long* parsed_len);
 VALUE zscan_unpack(VALUE self, VALUE fmt) {
   P;
   long parsed_len = 0;
@@ -410,8 +409,6 @@ VALUE zscan_unpack(VALUE self, VALUE fmt) {
   zscan_bytepos_eq(self, LONG2NUM(p->bytepos + parsed_len));
   return r;
 }
-
-extern void Init_zscan_bspec(VALUE, const rb_data_type_t*);
 
 void Init_zscan() {
   VALUE zscan = rb_define_class("ZScan", rb_cObject);

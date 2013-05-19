@@ -17,3 +17,7 @@ typedef struct {
   long stack_cap;
   Pos* stack;
 } ZScan;
+
+VALUE zscan_bytepos_eq(VALUE self, VALUE v_bytepos);
+VALUE zscan_internal_unpack(VALUE str, VALUE fmt, long* parsed_len);
+void Init_zscan_bspec(VALUE, const rb_data_type_t*);

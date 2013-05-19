@@ -135,10 +135,6 @@ static VALUE bspec_inspect_opcodes(VALUE bspec, VALUE self) {
 
 static VALUE zscan_scan_binary(VALUE self, VALUE spec) {
   ZScan* p = rb_check_typeddata(self, zscan_type);
-  if (!rb_enc_str_asciicompat_p(p->s)) {
-    rb_raise(rb_eRuntimeError, "encoding of source string should be ascii-compatible");
-    return Qnil;
-  }
   BSpec* bs = rb_check_typeddata(spec, &bspec_type);
   if (bs->a_size == 0) {
     return rb_ary_new();
@@ -149,8 +145,7 @@ static VALUE zscan_scan_binary(VALUE self, VALUE spec) {
   }
   volatile VALUE a = rb_ary_new2(bs->a_size - 1);
   bspec_exec(bs->code, RSTRING_PTR(p->s) + p->bytepos, a);
-  p->bytepos += s_size;
-  p->pos += s_size;
+  zscan_bytepos_eq(self, p->bytepos + s_size);
   return a;
 }
 
