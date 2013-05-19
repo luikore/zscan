@@ -22,7 +22,7 @@ describe 'ZScan binary scanning methods' do
   end
 
   it "#scan_binary" do
-    s = ZScan.binary_spec do
+    s = ZScan::BinarySpec.new do
       int8        # once
       uint32_le 2 # little endian, twice
       double_be 1 # big endian, once

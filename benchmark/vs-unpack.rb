@@ -1,7 +1,7 @@
 require_relative "../lib/zscan"
 require "benchmark"
 
-spec = ZScan.binary_spec do
+spec = ZScan::BinarySpec.new do
   int8
   double_le 2
   single_be

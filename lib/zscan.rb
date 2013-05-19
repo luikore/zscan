@@ -146,17 +146,11 @@ class ZScan
     r
   end
 
-  def self.binary_spec &p
-    bs = BinarySpec.send :new
-    bs.instance_eval &p
-    bs
-  end
-
   class BinarySpec
-    private :append
-    class << self
-      private :new
+    def initialize &p
+      instance_eval &p
     end
+    private :append
   end
 
   private :_internal_init, :_internal_string

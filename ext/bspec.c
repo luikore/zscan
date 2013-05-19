@@ -145,7 +145,7 @@ static VALUE zscan_scan_binary(VALUE self, VALUE spec) {
   }
   volatile VALUE a = rb_ary_new2(bs->a_size - 1);
   bspec_exec(bs->code, RSTRING_PTR(p->s) + p->bytepos, a);
-  zscan_bytepos_eq(self, p->bytepos + s_size);
+  zscan_bytepos_eq(self, LONG2NUM(p->bytepos + s_size));
   return a;
 }
 
