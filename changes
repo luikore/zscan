@@ -1,5 +1,7 @@
 1.3
 
+2013-05-19
+  optimize #unpack
 2013-05-18
   add #rest_size, #rest_bytesize, #slice, #byteslice
 
