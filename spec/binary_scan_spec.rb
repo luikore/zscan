@@ -4,13 +4,21 @@ require_relative "spec_helper"
 describe 'ZScan binary scanning methods' do
   it "#unpack" do
     z = ZScan.new "\x01\x02\x03"
-    assert_raise ArgumentError do
-      z.unpack '@1C'
-    end
     assert_equal [1, 2], (z.unpack 'CC')
     assert_equal 2, z.pos
-    assert_equal nil, (z.unpack 'I')
+    assert_equal [nil], (z.unpack 'I')
     assert_equal 2, z.pos
+  end
+
+  it "#unpack position-changing instructions and var-length instructions" do
+    z = ZScan.new "abcd\0abc"
+    s, _ = z.unpack 'Z*'
+    assert_equal "abcd", s
+    assert_equal 5, z.pos
+
+    z.reset
+    s, _ = z.unpack '@2Z*'
+    assert_equal 'cd', s
   end
 
   it "#scan_binary" do

@@ -65,7 +65,7 @@ See also https://bugs.ruby-lang.org/issues/7092
 - `#scan_int radix=nil` if radix is nil, decide base by prefix: `0x` is 16, `0` is 8, `0b` is 2, otherwise 10. `radix` should be in range `2..36`.
 - `#scan_date format_string, start=Date::ITALY` scan a `DateTime` object, see also [strptime](http://rubydoc.info/stdlib/date/DateTime.strptime).
 - `#scan_binary binary_spec` optimized and readable binary scan, see below for how to create a `ZScan::BinarySpec`.
-- `#unpack format_string`
+- `#unpack format_string` note that unpack always returns an array no matter matched or not (same behavior as String#unpack).
 - `#eos?`
 - `#string` note: return a dup. Don't worry the performance because it is a copy-on-write string.
 - `#rest` rest unscanned sub string.
@@ -94,11 +94,10 @@ For convienience
 
 ## Binary parsing
 
-Specify a sequence of binary data. Designed for binary protocol parsing. Example:
+Designed for binary protocol parsing. You can specify a sequence of binary data and how to expect the matching. Example:
 
 ```ruby
-# create a ZScan::BinarySpec
-s = ZScan.binary_spec do
+s = ZScan.BinarySpec.new do
   int8        # once
   uint32_le 2 # little endian, twice
   double_be 1 # big endian, once

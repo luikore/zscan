@@ -401,6 +401,16 @@ VALUE zscan_scan_float(VALUE self) {
   }
 }
 
+extern VALUE zscan_internal_unpack(VALUE str, VALUE fmt, long* parsed_len);
+VALUE zscan_unpack(VALUE self, VALUE fmt) {
+  P;
+  long parsed_len = 0;
+  volatile VALUE str = zscan_rest(self);
+  VALUE r = zscan_internal_unpack(str, fmt, &parsed_len);
+  zscan_bytepos_eq(self, LONG2NUM(p->bytepos + parsed_len));
+  return r;
+}
+
 extern void Init_zscan_bspec(VALUE, const rb_data_type_t*);
 
 void Init_zscan() {
@@ -420,6 +430,7 @@ void Init_zscan() {
 
   rb_define_method(zscan, "match_bytesize", zscan_match_bytesize, 1);
   rb_define_method(zscan, "scan", zscan_scan, 1);
+  rb_define_method(zscan, "unpack", zscan_unpack, 1);
   rb_define_method(zscan, "push", zscan_push, 0);
   rb_define_method(zscan, "pop", zscan_pop, 0);
   rb_define_method(zscan, "drop", zscan_drop, 0);

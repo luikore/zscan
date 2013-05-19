@@ -133,9 +133,9 @@ extout_prefix =
 target_prefix = 
 LOCAL_LIBS = 
 LIBS = $(LIBRUBYARG_SHARED)  -lpthread -ldl -lobjc 
-ORIG_SRCS = bspec.c zscan.c
+ORIG_SRCS = bspec.c zscan.c pack/pack.c
 SRCS = $(ORIG_SRCS) 
-OBJS = bspec.o zscan.o
+OBJS = bspec.o zscan.o pack/pack.o
 HDRS = $(srcdir)/zscan.h
 TARGET = zscan
 TARGET_NAME = zscan
@@ -238,4 +238,4 @@ $(DLLIB): $(OBJS) Makefile
 
 $(OBJS): $(HDRS) $(ruby_headers)
 
-$(OBJS): zscan.h
+$(OBJS): pack/internal.h zscan.h

@@ -80,7 +80,7 @@ class ZScan
     end
   end
 
-  def unpack format
+  def _unpack format
     if format.index('@')
       raise ArgumentError, 'position instruction @ not supported'
     end
