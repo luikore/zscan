@@ -96,4 +96,12 @@ describe ZScan do
     z.pos = 2
     assert_equal 1, z.line_index
   end
+
+  it '#cleanup' do
+    @z.scan /\w/
+    @z.cleanup
+    assert_equal 'b你好', @z.string
+    assert_equal 0, @z.pos
+    assert_equal 0, @z.bytepos
+  end
 end

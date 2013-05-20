@@ -79,6 +79,7 @@ For convienience
 - `#[]= range, replace_string` note: if `range` starts before pos, moves pos left, also clears the stack.
 - `#size`
 - `#bytesize`
+- `#cleanup` cleanup substring before current pos.
 
 ## Pos management
 

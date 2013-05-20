@@ -1,5 +1,7 @@
 2.0
 
+2013-05-21
+  add #cleanup to truncate the internal string
 2013-05-20
   rename #scan_binary to #scan_bytes, added expectations
 

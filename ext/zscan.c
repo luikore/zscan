@@ -170,6 +170,15 @@ static VALUE zscan_rest_bytesize(VALUE self) {
   return LONG2NUM(RSTRING_LEN(p->s) - p->bytepos);
 }
 
+static VALUE zscan_cleanup(VALUE self) {
+  P;
+  long rest_len = RSTRING_LEN(p->s) - p->bytepos;
+  p->s = rb_funcall(p->s, rb_intern("byteslice"), 2, LONG2NUM(p->bytepos), LONG2NUM(rest_len));
+  p->bytepos = 0;
+  p->pos = 0;
+  return self;
+}
+
 regex_t *rb_reg_prepare_re(VALUE re, VALUE str);
 static VALUE zscan_match_bytesize(VALUE self, VALUE pattern) {
   P;
@@ -424,6 +433,7 @@ void Init_zscan() {
   rb_define_method(zscan, "rest", zscan_rest, 0);
   rb_define_method(zscan, "rest_size", zscan_rest_size, 0);
   rb_define_method(zscan, "rest_bytesize", zscan_rest_bytesize, 0);
+  rb_define_method(zscan, "cleanup", zscan_cleanup, 0);
 
   rb_define_method(zscan, "match_bytesize", zscan_match_bytesize, 1);
   rb_define_method(zscan, "scan", zscan_scan, 1);
