@@ -46,7 +46,7 @@ static VALUE zscan_internal_string(VALUE self) {
 
 static VALUE zscan_pos(VALUE self) {
   P;
-  return ULONG2NUM(p->pos);
+  return LONG2NUM(p->pos);
 }
 
 static VALUE zscan_advance(VALUE self, VALUE v_diff) {
@@ -83,7 +83,7 @@ static VALUE zscan_advance(VALUE self, VALUE v_diff) {
 
 static VALUE zscan_bytepos(VALUE self) {
   P;
-  return ULONG2NUM(p->bytepos);
+  return LONG2NUM(p->bytepos);
 }
 
 VALUE zscan_bytepos_eq(VALUE self, VALUE v_bytepos) {
@@ -183,9 +183,9 @@ regex_t *rb_reg_prepare_re(VALUE re, VALUE str);
 static VALUE zscan_match_bytesize(VALUE self, VALUE pattern) {
   P;
   if (TYPE(pattern) == T_STRING) {
-    volatile VALUE ss = rb_funcall(p->s, rb_intern("byteslice"), 2, ULONG2NUM(p->bytepos), ULONG2NUM(RSTRING_LEN(p->s)));
+    volatile VALUE ss = rb_funcall(p->s, rb_intern("byteslice"), 2, LONG2NUM(p->bytepos), LONG2NUM(RSTRING_LEN(p->s) - p->bytepos));
     if (RTEST(rb_funcall(ss, rb_intern("start_with?"), 1, pattern))) {
-      return ULONG2NUM(RSTRING_LEN(pattern));
+      return LONG2NUM(RSTRING_LEN(pattern));
     }
   } else if (TYPE(pattern) == T_REGEXP) {
     regex_t *re = rb_reg_prepare_re(pattern, p->s); // prepare with compatible encoding
