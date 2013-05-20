@@ -49,5 +49,6 @@ describe 'ZScan binary scanning methods' do
     a = [2, 4.0]
     z = ZScan.new a.pack('cf')
     assert_equal nil, z.scan_bytes(s)
+    assert_equal 0, z.pos
   end
 end

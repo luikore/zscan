@@ -159,7 +159,9 @@ static VALUE zscan_scan_bytes(VALUE self, VALUE spec) {
   }
   volatile VALUE a = rb_ary_new2(bs->a_size - 1);
   a = bspec_exec(bs->code, RSTRING_PTR(p->s) + p->bytepos, a);
-  zscan_bytepos_eq(self, LONG2NUM(p->bytepos + s_size));
+  if (a != Qnil) {
+    zscan_bytepos_eq(self, LONG2NUM(p->bytepos + s_size));
+  }
   return a;
 }
 
