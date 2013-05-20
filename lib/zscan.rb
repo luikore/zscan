@@ -44,7 +44,7 @@ class ZScan
         case radix
         when 2;  /[01]+/
         when 8;  /[0-7]+/
-        when 10; /\d+/
+        when 10; /[0-9]+/ # don't use \d because it matches unicode numbers
         when 16; /\h+/i
         else
           if radix < 10
@@ -53,7 +53,7 @@ class ZScan
             raise ArgumentError, "invalid radix #{radix}"
           else
             end_char = ('a'.ord + (radix - 11)).chr
-            /[\da-#{end_char}]+/i
+            /[0-9a-#{end_char}]+/i
           end
         end
     end

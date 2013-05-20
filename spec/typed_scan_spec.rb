@@ -18,6 +18,12 @@ describe "typed scan" do
     assert_equal 030, z.scan_int
   end
 
+  it '#scan_int does not use unicode numbers' do
+    z = Zscan.new "一二".force_encoding('utf-8')
+    assert_equal nil, z.scan_int
+    assert_equal 0, z.pos
+  end
+
   it "#scan_float" do
     z = Zscan.new " -3.5e23"
     assert_equal nil, z.scan_float
