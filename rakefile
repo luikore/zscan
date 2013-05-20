@@ -2,7 +2,7 @@ require_relative "generate/generate"
 Dir.chdir __dir__
 version_re   = /\d+(\.\d+)*/
 version      = `command grep 'VERSION =' lib/zscan.rb`[version_re]
-gem_files    = Dir.glob('{rakefile,zscan.gemspec,readme.md,**/*.{rb,h,c,inc}},ext/pack/COPYING*')
+gem_files    = Dir.glob('{rakefile,zscan.gemspec,readme.md,**/*.{rb,h,c,inc},ext/pack/COPYING*}')
 gem_package  = "zscan-#{version}.gem"
 generate_src = [__FILE__, *Dir.glob('generate/*')]
 
@@ -30,6 +30,10 @@ file gem_package => gem_files + Generate.files do
   if new_version
     File.open('zscan.gemspec', 'w'){|f| f << lines.join }
   end
+  puts "packing files:"
+  puts '-' * 40
+  puts gem_files
+  puts '-' * 40
   sh "gem build zscan.gemspec"
 end
 
