@@ -80,20 +80,6 @@ class ZScan
     end
   end
 
-  def _unpack format
-    if format.index('@')
-      raise ArgumentError, 'position instruction @ not supported'
-    end
-    r = rest.unpack format
-    if r.index(nil)
-      return
-    end
-    # XXX pack to get parsed length because no related API is exposed ...
-    len = r.pack(format).bytesize
-    self.bytepos += len
-    r
-  end
-
   def pos= new_pos
     advance new_pos - pos
   end
