@@ -1,5 +1,5 @@
 require_relative "../ext/zscan"
-require_relative "zscan/instructions"
+require_relative "zscan/bspec"
 require "date"
 
 class ZScan
@@ -144,13 +144,6 @@ class ZScan
     r = _internal_string.byteslice bytepos, bytesize
     self.bytepos += bytesize
     r
-  end
-
-  class BinarySpec
-    def initialize &p
-      instance_eval &p
-    end
-    private :append
   end
 
   private :_internal_init, :_internal_string

@@ -21,18 +21,33 @@ describe 'ZScan binary scanning methods' do
     assert_equal 'cd', s
   end
 
-  it "#scan_binary" do
-    s = ZScan::BinarySpec.new do
-      int8        # once
-      uint32_le 2 # little endian, twice
-      double_be 1 # big endian, once
-      single 1
+  it "#scan_bytes" do
+    s = ZScan::BSpec.new do
+      int8
+      2.times{ uint32_le } # little endian
+      double_be            # big endian
+      single
     end
 
     a = [-1, 2, 3, 4.0, 3.0]
     z = ZScan.new(a.pack('cI<2Gf') + 'rest')
-    b = z.scan_binary s
+    b = z.scan_bytes s
     assert_equal 'rest', z.rest
     assert_equal a, b
+  end
+
+  it "#scan_bytes with expectation" do
+    s = ZScan::BSpec.new do
+      int8 expect: 3
+      float
+    end
+
+    a = [3, 4.0]
+    z = ZScan.new a.pack('cf')
+    assert_equal a, z.scan_bytes(s)
+
+    a = [2, 4.0]
+    z = ZScan.new a.pack('cf')
+    assert_equal nil, z.scan_bytes(s)
   end
 end

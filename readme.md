@@ -4,7 +4,8 @@
 - `ZScan#pos` is the codepoint position, and `ZScan#bytepos` is byte position.
 - Correctly scans anchors and look behind predicates.
 - Pos stack manipulation.
-- Typed scanning methods: `#scan_float`, `#scan_int radix=nil`, `#scan_date format`, `#scan_binary format`.
+- Typed scanning methods: `#scan_float`, `#scan_int radix=nil`, `#scan_date format`.
+- Binary scanning methods: `#scan_bytes spec`, `#scan_bits opts`, `#unpack format`.
 
 ## Install
 
@@ -50,8 +51,8 @@ See also https://bugs.ruby-lang.org/issues/7092
 ## Other motivations
 
 - For scan and convert, ruby's stdlib `Scanf` is slow (creates regexp array everytime called) and not possible to corporate with scanner.
-- For date parsing, `strptime` doesn't tell the parsed length.
-- For binary parsing, `unpack` is an slow interpreter, and the instructions are quite irregular.
+- For date parsing, `Date#strptime` doesn't tell the parsed length.
+- For binary parsing, `String#unpack` is an slow interpreter, it doesn't tell the parsed length either, and the instructions are quite irregular.
 
 ## Essential methods
 
@@ -64,8 +65,6 @@ See also https://bugs.ruby-lang.org/issues/7092
 - `#scan_float` scan a float number which is not starting with space. It deals with multibyte encodings for you.
 - `#scan_int radix=nil` if radix is nil, decide base by prefix: `0x` is 16, `0` is 8, `0b` is 2, otherwise 10. `radix` should be in range `2..36`.
 - `#scan_date format_string, start=Date::ITALY` scan a `DateTime` object, see also [strptime](http://rubydoc.info/stdlib/date/DateTime.strptime).
-- `#scan_binary binary_spec` optimized and readable binary scan, see below for how to create a `ZScan::BinarySpec`.
-- `#unpack format_string` note that unpack always returns an array no matter matched or not (same behavior as String#unpack).
 - `#eos?`
 - `#string` note: return a dup. Don't worry the performance because it is a copy-on-write string.
 - `#rest` rest unscanned sub string.
@@ -92,35 +91,49 @@ For convienience
 - `#reset` go to beginning.
 - `#terminate` go to end of string.
 
-## Binary parsing
+## Binary scanning
 
-Designed for binary protocol parsing. You can specify a sequence of binary data and how to expect the matching. Example:
+- `#scan_bytes bspec` optimized and readable binary scan, see below for how to create a `ZScan::BSpec`.
+- `#scan_bits hash` decode bits as described in the format, see below for how to specify the format.
+- `#unpack unpack_format_string` note that it always returns an array no matter matched or not (same behavior as `String#unpack`).
+
+#### Bytes spec
+
+Bytes spec is designed for fast binary protocol parsing. You can specify a sequence of binary data and how to expect the matching.
+
+Unlike `#unpack`, bytes spec uses english names to specify the data sequence. It returns `nil` if any of the instructions not matching. Though there's no string / position changing / variable length instructions.
+
+Bytes spec is implemented as direct-threaded VM, it faster than `#unpack`.
+
+Example:
 
 ```ruby
-s = ZScan.BinarySpec.new do
-  int8        # once
-  uint32_le 2 # little endian, twice
-  double_be 1 # big endian, once
+s = ZScan.BSpec.new do
+  int8 expect: -1 # return nil if the first int8 is not -1
+  2.times{
+    uint32_le # le means: little endian
+  }
+  double_be   # be means: big endian
 end
+
 z = ZScan.new [-1, 2, 3, 4.0].pack('cI<2G') + "rest"
-z.scan_binary s #=> [-1, 2, 3, 4.0]
+z.scan_bytes s #=> [-1, 2, 3, 4.0]
 z.rest #=> 'rest
+
+bad_z = ZScan.new [1, 2, 3, 4.0].pack('cI<2G) # first byte not match
+z.scan_bytes s #=> nil
 ```
 
 Integer instructions:
 
 ```ruby
-int8  uint8
+int8  uint8  byte # byte is the same as uint8
 int16 uint16 int16_le uint16_le int16_be uint16_be
 int32 uint32 int32_le uint32_le int32_be uint32_be
 int64 uint64 int64_le uint64_le int64_be uint64_be
 ```
 
-Single precision float instructions:
-
-```ruby
-single single_le single_be
-```
+Only integer instructions support the `:expect` option, match quickly stops if the scanned result not equal to the expected number.
 
 Double precision float instructions:
 
@@ -128,15 +141,22 @@ Double precision float instructions:
 double double_le double_be
 ```
 
-Endians:
+Single precision float instructions:
+
+```ruby
+float float_le float_be
+single single_le single_be # same as float*
+```
+
+Note that ruby floats are doubles in fact, in a very rare case, you may need to keep the original single-precision data instead of converting into doubles, you can use `uint32` for the job.
+
+A note on endians:
 
 - (without endian suffix) native endian
 - `*_le` little endian (VAX, x86, Windows string code unit)
 - `*_be` big endian, network endian (SPARC, Java string code unit)
 
-Repeat count must be integer `>= 1`, default is `1`.
-
-It is implemented as a direct-threaded bytecode interpreter. A bit faster than `String#unpack`.
+#### Bit spec
 
 ## Parsing combinators
 

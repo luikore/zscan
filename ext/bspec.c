@@ -8,6 +8,7 @@ typedef struct {
   long s_size;
   long a_size;
   long a_cap;
+  long curr;
   void** code;
 } BSpec;
 
@@ -23,7 +24,7 @@ static size_t bspec_memsize(const void* pp) {
 }
 
 static const rb_data_type_t bspec_type = {
-  "ZScan::BinarySpec",
+  "ZScan::BSpec",
   {NULL, bspec_free, bspec_memsize}
 };
 
@@ -32,6 +33,7 @@ static VALUE bspec_alloc(VALUE klass) {
   bs->s_size = 0;
   bs->a_cap = 4;
   bs->a_size = 0;
+  bs->curr = 0;
   bs->code = (void**)malloc(bs->a_cap * sizeof(void*));
   for (long i = 0; i < bs->a_cap; i++) {
     bs->code[i] = bspec_opcodes[0];
@@ -39,15 +41,8 @@ static VALUE bspec_alloc(VALUE klass) {
   return TypedData_Wrap_Struct(klass, &bspec_type, bs);
 }
 
-static VALUE bspec_append(VALUE self, VALUE v_i) {
-  BSpec* bs = rb_check_typeddata(self, &bspec_type);
-  long i = NUM2LONG(v_i);
-  if (i < 0 || i >= bspec_opcodes_size) {
-    rb_raise(rb_eArgError, "bad opcode index");
-  }
-
-  // ensure size
-  if (bs->a_size == bs->a_cap - 1) { // end with 0:RET, always terminate
+static void bspec_ensure_size(BSpec* bs) {
+  if (bs->curr == bs->a_cap - 1) { // end with 0:RET, always terminate
     bs->code = (void**)realloc(bs->code, bs->a_cap * 2 * sizeof(void*));
     long j = bs->a_cap;
     bs->a_cap *= 2;
@@ -55,9 +50,28 @@ static VALUE bspec_append(VALUE self, VALUE v_i) {
       bs->code[j] = bspec_opcodes[0];
     }
   }
+}
 
-  bs->code[bs->a_size++] = bspec_opcodes[i];
+static VALUE bspec_append(VALUE klass, VALUE self, VALUE v_i) {
+  BSpec* bs = rb_check_typeddata(self, &bspec_type);
+  long i = NUM2LONG(v_i);
+  if (i < 0 || i >= bspec_opcodes_size) {
+    rb_raise(rb_eArgError, "bad opcode index");
+  }
+
+  bspec_ensure_size(bs);
+  bs->a_size++;
+  bs->code[bs->curr++] = bspec_opcodes[i];
   bs->s_size += bspec_s_sizes[i];
+  return self;
+}
+
+static VALUE bspec_append_expect(VALUE klass, VALUE self, VALUE expect) {
+  BSpec* bs = rb_check_typeddata(self, &bspec_type);
+  bspec_ensure_size(bs);
+  bs->code[bs->curr] = 0;
+  memcpy(bs->code + bs->curr, RSTRING_PTR(expect), RSTRING_LEN(expect));
+  bs->curr++;
   return self;
 }
 
@@ -133,7 +147,7 @@ static VALUE bspec_inspect_opcodes(VALUE bspec, VALUE self) {
   return a;
 }
 
-static VALUE zscan_scan_binary(VALUE self, VALUE spec) {
+static VALUE zscan_scan_bytes(VALUE self, VALUE spec) {
   ZScan* p = rb_check_typeddata(self, zscan_type);
   BSpec* bs = rb_check_typeddata(spec, &bspec_type);
   if (bs->a_size == 0) {
@@ -144,20 +158,21 @@ static VALUE zscan_scan_binary(VALUE self, VALUE spec) {
     return Qnil;
   }
   volatile VALUE a = rb_ary_new2(bs->a_size - 1);
-  bspec_exec(bs->code, RSTRING_PTR(p->s) + p->bytepos, a);
+  a = bspec_exec(bs->code, RSTRING_PTR(p->s) + p->bytepos, a);
   zscan_bytepos_eq(self, LONG2NUM(p->bytepos + s_size));
   return a;
 }
 
 void Init_zscan_bspec(VALUE zscan, const rb_data_type_t* _zscan_type) {
   zscan_type = _zscan_type;
-  rb_define_method(zscan, "scan_binary", zscan_scan_binary, 1);
+  rb_define_method(zscan, "scan_bytes", zscan_scan_bytes, 1);
 
   bspec_opcodes = (void**)bspec_exec(NULL, NULL, Qnil);
-  VALUE bs = rb_define_class_under(zscan, "BinarySpec", rb_cObject);
+  VALUE bs = rb_define_class_under(zscan, "BSpec", rb_cObject);
+  rb_define_singleton_method(bs, "_append", bspec_append, 2);
+  rb_define_singleton_method(bs, "_append_expect", bspec_append_expect, 2);
   rb_define_singleton_method(bs, "big_endian?", bspec_big_endian_p, 0);
   rb_define_singleton_method(bs, "_opcodes_to_a", bspec_opcodes_to_a, 0);
   rb_define_singleton_method(bs, "_inspect_opcodes", bspec_inspect_opcodes, 1);
   rb_define_alloc_func(bs, bspec_alloc);
-  rb_define_method(bs, "append", bspec_append, 1);
 }

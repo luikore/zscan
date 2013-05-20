@@ -1,9 +1,10 @@
 require_relative "../lib/zscan"
 require "benchmark"
 
-spec = ZScan::BinarySpec.new do
+spec = ZScan::BSpec.new do
   int8
-  double_le 2
+  double_le
+  double_le
   single_be
 end
 
@@ -15,7 +16,7 @@ puts 'reference nop group'
 puts Benchmark.measure{ 100000.times{ z.pos = 0 } }
 puts 'ZScan#unpack'
 puts Benchmark.measure{ 100000.times{ z.pos = 0; z.unpack 'cE2g' } }
-puts 'ZScan#scan_binary'
-puts Benchmark.measure{ 100000.times{ z.pos = 0; z.scan_binary spec } }
+puts 'ZScan#scan_bytes'
+puts Benchmark.measure{ 100000.times{ z.pos = 0; z.scan_bytes spec } }
 puts 'String#unpack'
 puts Benchmark.measure{ 100000.times{ z.pos = 0; str.unpack 'cE2g' } }
