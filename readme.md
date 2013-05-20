@@ -5,7 +5,7 @@
 - Correctly scans anchors and look behind predicates.
 - Pos stack manipulation.
 - Typed scanning methods: `#scan_float`, `#scan_int radix=nil`, `#scan_date format`.
-- Binary scanning methods: `#scan_bytes spec`, `#scan_bits opts`, `#unpack format`.
+- Binary scanning methods: `#scan_bytes spec`, `#unpack format`.
 
 ## Install
 
@@ -94,7 +94,6 @@ For convienience
 ## Binary scanning
 
 - `#scan_bytes bspec` optimized and readable binary scan, see below for how to create a `ZScan::BSpec`.
-- `#scan_bits hash` decode bits as described in the format, see below for how to specify the format.
 - `#unpack unpack_format_string` note that it always returns an array no matter matched or not (same behavior as `String#unpack`).
 
 #### Bytes spec
