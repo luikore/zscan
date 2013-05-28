@@ -10,9 +10,15 @@ desc "generate, build and test, and pack gem"
 task :default => [:gen, :test, gem_package]
 
 desc "build and test"
-task :test do
+task :test => 'ext/Makefile' do
   sh "make -C ext"
   sh "rspec"
+end
+
+file 'ext/Makefile' do
+  Dir.chdir 'ext' do
+    sh "ruby extconf.rb"
+  end
 end
 
 desc "pack gem"
