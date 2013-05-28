@@ -58,7 +58,7 @@ See also https://bugs.ruby-lang.org/issues/7092
 
 - `ZScan.new string, dup=false`
 - `#scan regexp_or_string`
-- `#skip regexp_or_string`
+- `#skip regexp_or_string` return new byte pos or `nil`
 - `#match_bytesize regexp_or_string` return length of matched bytes or `nil`.
 - `#slice n` slice sub string of n chars from current pos, advances the cursor.
 - `#byteslice n` slice sub string of n bytes from cursor pos, advances the cursor.

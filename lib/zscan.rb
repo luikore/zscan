@@ -18,12 +18,6 @@ class ZScan
     _internal_string.dup
   end
 
-  def skip re_or_str
-    if sz = match_bytesize(re_or_str)
-      self.bytepos += sz
-    end
-  end
-
   def scan_int radix=nil
     negative = false
     r = try do
