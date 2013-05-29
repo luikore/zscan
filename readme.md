@@ -156,8 +156,6 @@ A note on endians:
 - `*_le` little endian (VAX, x86, Windows string code unit)
 - `*_be` big endian, network endian (SPARC, Java string code unit)
 
-#### Bit spec
-
 ## Parsing combinators
 
 Combinators that manage scanner pos and stack state for you. In the combinators, if the returned value of the given block is `nil` or `false`, stops iteration and restores scanner location. Can be nested, useful for building parsers.
@@ -175,6 +173,34 @@ Combinators that manage scanner pos and stack state for you. In the combinators,
 - `#restore` set current pos to top of the stack.
 - `#clear_pos_stack` clear pos stack.
 - `z.push._try expr` equivalent to `z.try{ expr }`, but faster because no block is required
+
+## Features QA
+
+#### `scan_until` and `skip_until`?
+
+For example, the StringScanner call
+
+```ruby
+strscan.scan_until /a/
+```
+
+Is equivalent to a slightly different regexp
+
+```ruby
+zscan.scan /.*a/m
+```
+
+#### Capture groups?
+
+Not implemented yet. Maybe future?
+
+#### `unscan`?
+
+Use pos management methods.
+
+#### Erlang style bitstring?
+
+Thought of that but the API can be quirky... It's way beyond a string scanner.
 
 ## License
 
