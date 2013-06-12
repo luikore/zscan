@@ -202,6 +202,14 @@ Use pos management methods.
 
 Thought of that but the API can be quirky... It's way beyond a string scanner.
 
+## Build
+
+```bash
+gem ins rspec
+rake gen
+rake
+```
+
 ## License
 
 ```

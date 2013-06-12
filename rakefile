@@ -23,7 +23,7 @@ end
 
 desc "pack gem"
 file gem_package => gem_files + Generate.files do
-  sh "rm zscan-*.gem"
+  sh "rm -f zscan-*.gem"
 
   new_version = false
   lines = File.readlines('zscan.gemspec')

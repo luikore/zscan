@@ -1,7 +1,8 @@
-2.0.1
+2.0.2
 
 2013-06-12
   fix compile error on linux
+  fix compile error on 1.9
 
 2.0
 
