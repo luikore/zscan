@@ -1,5 +1,9 @@
 require "mkmf"
 
+if RbConfig::MAKEFILE_CONFIG['CC'] !~ /clang/
+  $CFLAGS << ' -std=c99 -Wno-declaration-after-statement'
+end
+
 create_makefile 'zscan'
 
 makefile = File.read 'Makefile'
