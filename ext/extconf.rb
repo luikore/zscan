@@ -1,7 +1,7 @@
 require "mkmf"
 
 if RbConfig::MAKEFILE_CONFIG['CC'] !~ /clang/
-  $CFLAGS << ' -std=c99 -Wno-declaration-after-statement'
+  $CFLAGS << ' -std=c99 -Wno-declaration-after-statement -Wno-strict-aliasing'
 end
 
 create_makefile 'zscan'
