@@ -6,3 +6,7 @@
    ((__GNUC__ > (major)) ||  \
     (__GNUC__ == (major) && __GNUC_MINOR__ > (minor)) || \
     (__GNUC__ == (major) && __GNUC_MINOR__ == (minor) && __GNUC_PATCHLEVEL__ >= (patchlevel))))
+
+#ifndef UNREACHABLE
+#define UNREACHABLE
+#endif
