@@ -328,7 +328,7 @@ static VALUE zscan_zero_or_one(int argc, VALUE* argv, VALUE self) {
   REQUIRE_BLOCK;
   volatile VALUE a = Qnil;
   volatile VALUE r;
-  rb_scan_args(argc, argv, "01", &a);
+  rb_scan_args(argc, argv, "01", (VALUE*)&a);
   if (a == Qnil) {
     a = rb_ary_new();
   }
@@ -349,7 +349,7 @@ static VALUE zscan_zero_or_more(int argc, VALUE* argv, VALUE self) {
   volatile VALUE r;
   long backpos;
   P;
-  rb_scan_args(argc, argv, "01", &a);
+  rb_scan_args(argc, argv, "01", (VALUE*)&a);
   if (a == Qnil) {
     a = rb_ary_new();
   }
@@ -377,7 +377,7 @@ static VALUE zscan_one_or_more(int argc, VALUE* argv, VALUE self) {
   if (RTEST(r)) {
     long backpos;
     P;
-    rb_scan_args(argc, argv, "01", &a);
+    rb_scan_args(argc, argv, "01", (VALUE*)&a);
     if (a == Qnil) {
       a = rb_ary_new();
     }

@@ -88,11 +88,13 @@ static VALUE bspec_big_endian_p(VALUE self) {
 #endif
 }
 
+#ifndef GCC_VERSION_SINCE
 #define GCC_VERSION_SINCE(major, minor, patchlevel) \
   (defined(__GNUC__) && !defined(__INTEL_COMPILER) && \
    ((__GNUC__ > (major)) ||  \
     (__GNUC__ == (major) && __GNUC_MINOR__ > (minor)) || \
     (__GNUC__ == (major) && __GNUC_MINOR__ == (minor) && __GNUC_PATCHLEVEL__ >= (patchlevel))))
+#endif
 
 #if GCC_VERSION_SINCE(4,3,0) || defined(__clang__)
 # define swap32(x) __builtin_bswap32(x)
