@@ -2,7 +2,7 @@ require_relative "generate/generate"
 Dir.chdir __dir__
 version_re   = /\d+(\.\d+)*/
 version      = `command grep 'VERSION =' lib/zscan.rb`[version_re]
-gem_files    = Dir.glob('{rakefile,zscan.gemspec,readme.md,**/*.{rb,h,c,inc},ext/pack/COPYING*}')
+gem_files    = Dir.glob('{rakefile,zscan.gemspec,readme.md,**/*.{rb,h,c,inc},ext/pack/COPYING*}') - Dir.glob('ext/pack/{pack.c,internal.h}')
 gem_package  = "zscan-#{version}.gem"
 generate_src = [__FILE__, *Dir.glob('generate/*')]
 
@@ -13,6 +13,14 @@ desc "build and test"
 task :test => 'ext/Makefile' do
   sh "make -C ext"
   sh "ruby spec/*.rb"
+end
+
+desc "clean"
+task :clean do
+  if File.exist?('ext/Makefile')
+    sh "cd ext && make clean"
+  end
+  sh "rm -f ext/pack/pack.c ext/pack/internal.h ext/Makefile zscan*.gem"
 end
 
 file 'ext/Makefile' => ['ext/extconf.rb', 'ext/pack/pack-25.c', 'ext/pack/pack-23.c'] do
