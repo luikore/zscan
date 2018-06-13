@@ -9,12 +9,12 @@ create_makefile 'zscan'
 
 makefile = File.read 'Makefile'
 
-if RUBY_VERSION < '2.4'
-  FileUtils.cp "pack/internal-23.h", "pack/internal.h"
-  FileUtils.cp "pack/pack-23.c", "pack/pack.c"
-else
+if RUBY_VERSION > '2.4'
   FileUtils.cp "pack/internal-25.h", "pack/internal.h"
   FileUtils.cp "pack/pack-25.c", "pack/pack.c"
+else
+  FileUtils.cp "pack/internal-23.h", "pack/internal.h"
+  FileUtils.cp "pack/pack-23.c", "pack/pack.c"
 end
 
 lines = makefile.lines.map do |line|

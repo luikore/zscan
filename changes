@@ -1,3 +1,9 @@
+2.0.4
+
+2018-06-13
+  fix compile error on 2.5+
+  renew building environment
+
 2.0.3
 
 2013-06-12

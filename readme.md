@@ -205,7 +205,6 @@ Thought of that but the API can be quirky... It's way beyond a string scanner.
 ## Build
 
 ```bash
-gem ins rspec
 rake gen
 rake
 ```
@@ -213,7 +212,7 @@ rake
 ## License
 
 ```
-Copyright (C) 2013 by Zete Lui (BSD)
+Copyright (C) 2013 by Zete Lui (MIT)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
