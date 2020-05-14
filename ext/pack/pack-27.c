@@ -14,6 +14,7 @@
 #include <float.h>
 #include <sys/types.h>
 
+#include <ruby/encoding.h>
 #include "internal.h"
 #include "internal/bits.h"
 #include "internal/string.h"

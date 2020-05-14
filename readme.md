@@ -13,6 +13,8 @@
 gem ins zscan
 ```
 
+For Ubuntu install, since the package `ruby-dev` is missing some key header files, you have to compile Ruby by source first.
+
 ## Typical use
 
 ``` ruby
