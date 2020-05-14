@@ -1,15 +1,23 @@
 require "mkmf"
 require "fileutils"
+require 'shellwords'
 
 if RbConfig::MAKEFILE_CONFIG['CC'] !~ /clang/
   $CFLAGS << ' -std=c99 -Wno-declaration-after-statement -Wno-strict-aliasing'
 end
+$CFLAGS << " -I #{File.expand_path(__dir__ + '/pack').shellescape}"
 
 create_makefile 'zscan'
 
 makefile = File.read 'Makefile'
 
-if RUBY_VERSION >= '2.6'
+if RUBY_VERSION >= '2.7'
+  FileUtils.cp "pack/internal-27.h", "pack/internal.h"
+  FileUtils.cp "pack/builtin-27.h", "pack/builtin.h"
+  FileUtils.cp "pack/pack-27.c", "pack/pack.c"
+  FileUtils.rm_rf "pack/internal"
+  FileUtils.cp_r "pack/internal-27", "pack/internal"
+elsif RUBY_VERSION >= '2.6'
   FileUtils.cp "pack/internal-26.h", "pack/internal.h"
   FileUtils.cp "pack/pack-26.c", "pack/pack.c"
 elsif RUBY_VERSION > '2.4'
