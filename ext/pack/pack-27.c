@@ -9,8 +9,6 @@
 
 **********************************************************************/
 
-#include "ruby/internal/config.h"
-
 #include <ctype.h>
 #include <errno.h>
 #include <float.h>
