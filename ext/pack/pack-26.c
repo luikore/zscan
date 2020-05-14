@@ -105,10 +105,6 @@ typedef union {
 
 #define MAX_INTEGER_PACK_SIZE 8
 
-static const char toofew[] = "too few arguments";
-
-static void encodes(VALUE,const char*,long,int,int);
-static void qpencode(VALUE,VALUE,long);
 
 static unsigned long utf8_to_uv(const char*,long*);
 
@@ -127,114 +123,9 @@ str_associated(VALUE str)
     return rb_ivar_lookup(str, id_associated, Qfalse);
 }
 
-static const char uu_table[] =
-"`!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_";
 static const char b64_table[] =
 "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-static void
-encodes(VALUE str, const char *s0, long len, int type, int tail_lf)
-{
-    enum {buff_size = 4096, encoded_unit = 4, input_unit = 3};
-    char buff[buff_size + 1];	/* +1 for tail_lf */
-    long i = 0;
-    const char *const trans = type == 'u' ? uu_table : b64_table;
-    char padding;
-    const unsigned char *s = (const unsigned char *)s0;
-
-    if (type == 'u') {
-	buff[i++] = (char)len + ' ';
-	padding = '`';
-    }
-    else {
-	padding = '=';
-    }
-    while (len >= input_unit) {
-        while (len >= input_unit && buff_size-i >= encoded_unit) {
-            buff[i++] = trans[077 & (*s >> 2)];
-            buff[i++] = trans[077 & (((*s << 4) & 060) | ((s[1] >> 4) & 017))];
-            buff[i++] = trans[077 & (((s[1] << 2) & 074) | ((s[2] >> 6) & 03))];
-            buff[i++] = trans[077 & s[2]];
-            s += input_unit;
-            len -= input_unit;
-        }
-        if (buff_size-i < encoded_unit) {
-            rb_str_buf_cat(str, buff, i);
-            i = 0;
-        }
-    }
-
-    if (len == 2) {
-	buff[i++] = trans[077 & (*s >> 2)];
-	buff[i++] = trans[077 & (((*s << 4) & 060) | ((s[1] >> 4) & 017))];
-	buff[i++] = trans[077 & (((s[1] << 2) & 074) | (('\0' >> 6) & 03))];
-	buff[i++] = padding;
-    }
-    else if (len == 1) {
-	buff[i++] = trans[077 & (*s >> 2)];
-	buff[i++] = trans[077 & (((*s << 4) & 060) | (('\0' >> 4) & 017))];
-	buff[i++] = padding;
-	buff[i++] = padding;
-    }
-    if (tail_lf) buff[i++] = '\n';
-    rb_str_buf_cat(str, buff, i);
-    if ((size_t)i > sizeof(buff)) rb_bug("encodes() buffer overrun");
-}
-
-static const char hex_table[] = "0123456789ABCDEF";
-
-static void
-qpencode(VALUE str, VALUE from, long len)
-{
-    char buff[1024];
-    long i = 0, n = 0, prev = EOF;
-    unsigned char *s = (unsigned char*)RSTRING_PTR(from);
-    unsigned char *send = s + RSTRING_LEN(from);
-
-    while (s < send) {
-        if ((*s > 126) ||
-	    (*s < 32 && *s != '\n' && *s != '\t') ||
-	    (*s == '=')) {
-	    buff[i++] = '=';
-	    buff[i++] = hex_table[*s >> 4];
-	    buff[i++] = hex_table[*s & 0x0f];
-            n += 3;
-            prev = EOF;
-        }
-	else if (*s == '\n') {
-            if (prev == ' ' || prev == '\t') {
-		buff[i++] = '=';
-		buff[i++] = *s;
-            }
-	    buff[i++] = *s;
-            n = 0;
-            prev = *s;
-        }
-	else {
-	    buff[i++] = *s;
-            n++;
-            prev = *s;
-        }
-        if (n > len) {
-	    buff[i++] = '=';
-	    buff[i++] = '\n';
-            n = 0;
-            prev = '\n';
-        }
-	if (i > 1024 - 5) {
-	    rb_str_buf_cat(str, buff, i);
-	    i = 0;
-	}
-	s++;
-    }
-    if (n > 0) {
-	buff[i++] = '=';
-	buff[i++] = '\n';
-    }
-    if (i > 0) {
-	rb_str_buf_cat(str, buff, i);
-    }
-}
 
 static inline int
 hex2num(char c)
@@ -284,6 +175,8 @@ infected_str_new(const char *ptr, long len, VALUE str)
 #define UNPACK_ARRAY 0
 #define UNPACK_BLOCK 1
 #define UNPACK_1 2
+
+#define castchar(from) (char)((from) & 0xff)
 
 VALUE zscan_internal_unpack(VALUE str, VALUE fmt, long* parsed_len)
 {
